@@ -1,0 +1,13 @@
+<username>
+<password>
+<no of subjects/courses>
+<subject 1 url to course website>
+<subject 2 url to course website>
+<subject 3 url to course website>
+<subject 4 url to course website>
+<subject 5 url to course website>
+<Download Directory for subject 1>
+<Download Directory for subject 2>
+<Download Directory for subject 3>
+<Download Directory for subject 4>
+<Download Directory for subject 5>
