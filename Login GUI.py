@@ -107,11 +107,11 @@ class box(Frame):
     def __init__(self, master, number):
         Frame.__init__(self)
         self.var = IntVar()
-        self.checkbox = Checkbutton(self, text=coursename[number], variable= self.var)
-        self.checkbox.grid(row=number+1,sticky = W,columnspan=4)
-        self.pack(fill =X)
-
-
+        self.checkbox = Checkbutton(self, text=coursename[number],width= 40, variable= self.var)
+        self.checkbox.grid(row=number+1,sticky=W)
+        self.browse = Button(self, text ="Browse")
+        self.browse.grid(row=number+1,column =5, sticky = E)
+        self.pack(fill =X,anchor= "w")
 
 root.wm_title("MooDLD")
 root.iconbitmap('favicon.png')
