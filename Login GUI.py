@@ -170,13 +170,27 @@ class box(Frame):
         Frame.__init__(self)
         self.var = IntVar()
         self.directory=StringVar()
-        self.directory.set("C:/")
+        try:
+            with open('Preferences.txt') as file:
+                pass
+            file_pref=open("Preferences.txt",'r')
+            lines = file_pref.readlines()
+            if(str(coursename[number]) in str(lines[3*number])):
+                self.directory.set((lines[3*number+2])[:lines[3*number+2].index("\n")])
+                print self.directory.get()
+            else:
+                self.directory.set("C:/")
+        except IOError as e:
+                                    
+            self.directory.set("C:/")
         self.checkbox = Checkbutton(self, text=coursename[number],width= 40, variable= self.var)
         self.checkbox.grid(row=number+1,sticky=W,pady=5)
         self.browse = Button(self, text ="Browse", command= self.getdir)
         self.browse.grid(row=number+1,column =5, sticky = E,pady=5)
         self.label_dir = Label(self,textvariable=self.directory)
         self.label_dir.grid(row=number+1 , column=6,pady=5)
+        
+        
         self.pack(fill =X,anchor= "w")
 
 root.wm_title("MooDLD")
