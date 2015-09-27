@@ -73,7 +73,27 @@ class LoginFrame(Frame):
     def new_window(self):
         self.destroy()
         br.open (self.profile)
+        self.newWindow = Sync(self.master)
+
+
+class Sync(Frame):
+    #def sync(self):
+        
+
+    def pref(self):
+        self.destroy()
         self.newWindow = Home(self.master)
+    
+    def __init__(self,master):
+        Frame.__init__(self)
+        self.Name = 'Welcome '+br.title()[:(br.title()).index(":")]
+        self.label_1 = Label(self, text=self.Name, justify=LEFT)
+        self.label_1.grid(row=0)
+        self.sync= Button(self, text="Sync Files")
+        self.sync.grid(row=1)
+        self.pref=Button(self, text="Preferences", command = self.pref)
+        self.pref.grid(row=2)
+        self.pack()
         
 
 class Home(Frame):
@@ -120,7 +140,7 @@ class Home(Frame):
         self.deselectall = Button(self, text="Deselect All", command= self.dall)     
         self.deselectall.grid(row=1, column =1)
         self.save = Button(self, text="Save Settings", command= self.save)     
-        self.save.grid(row=n+3,column=1,sticky = W)
+        self.save.grid(row=1,column=2,padx=60)
         self.pack(fill =X)
         
 
@@ -139,11 +159,11 @@ class box(Frame):
         self.directory=StringVar()
         self.directory.set("C:/")
         self.checkbox = Checkbutton(self, text=coursename[number],width= 40, variable= self.var)
-        self.checkbox.grid(row=number+1,sticky=W)
+        self.checkbox.grid(row=number+1,sticky=W,pady=5)
         self.browse = Button(self, text ="Browse", command= self.getdir)
-        self.browse.grid(row=number+1,column =5, sticky = E)
+        self.browse.grid(row=number+1,column =5, sticky = E,pady=5)
         self.label_dir = Label(self,textvariable=self.directory)
-        self.label_dir.grid(row=number+1 , column=6)
+        self.label_dir.grid(row=number+1 , column=6,pady=5)
         self.pack(fill =X,anchor= "w")
 
 root.wm_title("MooDLD")
