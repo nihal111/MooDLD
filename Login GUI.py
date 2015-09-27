@@ -75,5 +75,11 @@ class LoginFrame(Frame):
         self.newWindow = Home(self.master)
             
 
+
+
+root.wm_title("Moodle Login")
+root.geometry("250x100")
+root.iconbitmap(r'D:\Python\favicon.png')
+
 lf = LoginFrame(root)
 root.mainloop()
