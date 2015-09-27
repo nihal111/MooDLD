@@ -10,8 +10,9 @@ print "Opening Moodle!"
 br.open(moodle)
 text_file = open("Cred.txt", "w")
 root = Tk()
-n=2
-coursename=["MA 105","PH 107"]
+course = []
+coursename = []
+courses=[]
 
 
 class LoginFrame(Frame):
@@ -23,8 +24,8 @@ class LoginFrame(Frame):
         self.entry_1 = Entry(self)
         self.entry_2 = Entry(self, show="*")
         self.var = IntVar()
-        self.label_1.grid(row=0, sticky=E)
-        self.label_2.grid(row=1, sticky=E)
+        self.label_1.grid(row=0, sticky=W)
+        self.label_2.grid(row=1, sticky=W)
         self.entry_1.grid(row=0, column=1)
         self.entry_2.grid(row=1, column=1)
         
@@ -71,9 +72,15 @@ class LoginFrame(Frame):
 class Home(Frame):
     def __init__(self, master):
         Frame.__init__(self)
-        self.Name = br.title()[:(br.title()).index(":")]
-        self.label_1 = Label(self, text=self.Name)
-        self.label_1.grid(row=0)
+        self.Name = 'Welcome '+br.title()[:(br.title()).index(":")]
+        self.label_1 = Label(self, text=self.Name, justify=LEFT)
+        br.open('http://moodle.iitb.ac.in/')
+        for link in br.links(url_regex='http://moodle.iitb.ac.in/course/view.php'):
+                course.append(link)
+                coursename.append(link.text)
+        print coursename
+        n= len(course)                
+        self.label_1.grid(row=0, sticky=W)
         self.pack()
         for i in range (0,n):
             courses.append(box(root,i))
@@ -85,11 +92,8 @@ class box(Frame):
         Frame.__init__(self)
         self.var = IntVar()
         self.checkbox = Checkbutton(self, text=coursename[number], variable= self.var)
-        self.checkbox.grid(row=1)
-        self.pack()
-
-courses=[]
-
+        self.checkbox.grid(row=1,sticky = W)
+        self.pack(fill =X)
 
 
 
