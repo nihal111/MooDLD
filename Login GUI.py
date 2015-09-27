@@ -2,6 +2,7 @@ from Tkinter import *
 import tkMessageBox as tm
 import mechanize
 import time
+import tkFileDialog
 
 start_time = time.time()
 moodle = 'http://moodle.iitb.ac.in/login/index.php'
@@ -45,7 +46,7 @@ class LoginFrame(Frame):
             text_file.write(self.entry_1.get()+'\n')
             text_file.write(self.entry_2.get()+'\n')
             text_file.close()
-        
+                    
         
         br.select_form( nr=0 )
         br['username']= '150040015' #self.entry_1.get()
@@ -104,12 +105,18 @@ class Home(Frame):
             
         
 class box(Frame):
+    def getdir(self):
+        directory = tkFileDialog.askdirectory(parent=root, title='Please select a directory')
+        if len(directory) >0:
+            print directory
+        
+        
     def __init__(self, master, number):
         Frame.__init__(self)
         self.var = IntVar()
         self.checkbox = Checkbutton(self, text=coursename[number],width= 40, variable= self.var)
         self.checkbox.grid(row=number+1,sticky=W)
-        self.browse = Button(self, text ="Browse")
+        self.browse = Button(self, text ="Browse", command= self.getdir)
         self.browse.grid(row=number+1,column =5, sticky = E)
         self.pack(fill =X,anchor= "w")
 
