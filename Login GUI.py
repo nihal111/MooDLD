@@ -14,8 +14,13 @@ root = Tk()
 course = []
 coursename = []
 courses=[]
+save =[]
 
-
+class savedata():
+    def __init__(self,url,directory):
+        self.url = url
+        self.directory = directory
+        
 class LoginFrame(Frame):
     def __init__(self, master):
         Frame.__init__(self)
@@ -82,6 +87,20 @@ class Home(Frame):
         for i in range (0,n):
             courses[i].checkbox.deselect()
             print courses[i].var.get()
+
+            
+    def save(self):
+        n= len(course)
+        text_file = open("Cred.txt", "w")
+        for i in range (0,n):
+            x=str(courses[i].directory.get())
+            if not(x.endswith("/")):
+                courses[i].directory.set(x+'/')                
+            save.append(savedata(course[i].url,courses[i].directory.get()))
+        
+
+
+            
     def __init__(self, master):
         Frame.__init__(self)
         self.Name = 'Welcome '+br.title()[:(br.title()).index(":")]
@@ -100,14 +119,16 @@ class Home(Frame):
         self.selectall.grid(row=1,column=0)
         self.deselectall = Button(self, text="Deselect All", command= self.dall)     
         self.deselectall.grid(row=1, column =1)
+        self.save = Button(self, text="Save Settings", command= self.save)     
+        self.save.grid(row=n+3,column=1,sticky = W)
         self.pack(fill =X)
-
+        
 
             
         
 class box(Frame):
     def getdir(self):
-        directory = tkFileDialog.askdirectory(parent=root, title='Please select a directory')
+        directory = tkFileDialog.askdirectory(parent=root,initialdir ="C:/", title='Please select a directory')
         if len(directory) >0:
             self.directory.set(directory)
         
@@ -116,6 +137,7 @@ class box(Frame):
         Frame.__init__(self)
         self.var = IntVar()
         self.directory=StringVar()
+        self.directory.set("C:/")
         self.checkbox = Checkbutton(self, text=coursename[number],width= 40, variable= self.var)
         self.checkbox.grid(row=number+1,sticky=W)
         self.browse = Button(self, text ="Browse", command= self.getdir)
