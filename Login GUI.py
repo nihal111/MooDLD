@@ -61,5 +61,8 @@ class LoginFrame(Frame):
 
 
 root = Tk()
+root.wm_title("Moodle Login")
+root.geometry("250x100")
+root.iconbitmap(r'D:\Python\favicon.png')
 lf = LoginFrame(root)
 root.mainloop()
