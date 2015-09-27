@@ -48,8 +48,8 @@ class LoginFrame(Frame):
         
         
         br.select_form( nr=0 )
-        br['username']= self.entry_1.get()
-        br['password']= self.entry_2.get()
+        br['username']= '150040015' #self.entry_1.get()
+        br['password']= 'npain!!!'  #self.entry_2.get()
        
         br.submit()
 
@@ -70,6 +70,16 @@ class LoginFrame(Frame):
         
 
 class Home(Frame):
+    def sall(self):
+        n= len(course)
+        for i in range (0,n):
+            courses[i].checkbox.select()
+            print courses[i].var.get()
+    def dall(self):
+        n= len(course)
+        for i in range (0,n):
+            courses[i].checkbox.deselect()
+            print courses[i].var.get()
     def __init__(self, master):
         Frame.__init__(self)
         self.Name = 'Welcome '+br.title()[:(br.title()).index(":")]
@@ -84,6 +94,12 @@ class Home(Frame):
         self.pack()
         for i in range (0,n):
             courses.append(box(root,i))
+        self.selectall = Button(self, text="Select All", command= self.sall)     
+        self.selectall.grid(row=1,column=0,sticky = W)
+        self.deselectall = Button(self, text="Deselect All", command= self.dall)     
+        self.deselectall.grid(row=1, column =1)
+        self.pack(fill =X)
+
 
             
         
@@ -92,7 +108,7 @@ class box(Frame):
         Frame.__init__(self)
         self.var = IntVar()
         self.checkbox = Checkbutton(self, text=coursename[number], variable= self.var)
-        self.checkbox.grid(row=1,sticky = W)
+        self.checkbox.grid(row=number+1,sticky = W,columnspan=4)
         self.pack(fill =X)
 
 
