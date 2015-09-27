@@ -15,6 +15,7 @@ course = []
 coursename = []
 save =[]
 courses=[]
+myname = ""
 
 class savedata():
     def __init__(self,url,directory,name):
@@ -74,6 +75,8 @@ class LoginFrame(Frame):
     def new_window(self):
         self.destroy()
         br.open (self.profile)
+        global myname
+        myname = br.title()[:(br.title()).index(":")]
         self.newWindow = Sync(self.master)
 
 
@@ -86,8 +89,9 @@ class Sync(Frame):
         self.newWindow = Home(self.master)
     
     def __init__(self,master):
-        Frame.__init__(self)        
-        self.Name = 'Welcome '#+br.title()[:(br.title()).index(":")]
+        Frame.__init__(self)
+        print myname
+        self.Name = 'Welcome '+ str(myname)
         self.label_1 = Label(self, text=self.Name, justify=LEFT)
         self.label_1.grid(row=0)
         self.sync= Button(self, text="Sync Files")
@@ -132,8 +136,8 @@ class Home(Frame):
             
     def __init__(self, master):
         Frame.__init__(self)
-        self.Name = 'Welcome '#+br.title()[:(br.title()).index(":")]
-        self.label_1 = Label(self, text=self.Name, justify=LEFT)
+        self.Name = 'Welcome '+br.title()[:(br.title()).index(":")]
+        self.label_1 = Label(self, text=self.Name, justify=CENTER)
         del courses[:]
         del course[:]
         del coursename[:]
@@ -177,7 +181,7 @@ class box(Frame):
             lines = file_pref.readlines()
             if(str(coursename[number]) in str(lines[3*number])):
                 self.directory.set((lines[3*number+2])[:lines[3*number+2].index("\n")])
-                print self.directory.get()
+                
             else:
                 self.directory.set("C:/")
         except IOError as e:
