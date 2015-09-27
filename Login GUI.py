@@ -10,15 +10,9 @@ print "Opening Moodle!"
 br.open(moodle)
 text_file = open("Cred.txt", "w")
 root = Tk()
+n=2
+coursename=["MA 105","PH 107"]
 
-
-class Home(Frame):
-    def __init__(self, master):
-        Frame.__init__(self)
-        self.Name = br.title()[:(br.title()).index(":")]
-        self.label_1 = Label(self, text=self.Name)
-        self.label_1.grid(row=0, sticky=E)
-        self.pack() 
 
 class LoginFrame(Frame):
     def __init__(self, master):
@@ -71,14 +65,35 @@ class LoginFrame(Frame):
     def new_window(self):
         self.destroy()
         br.open (self.profile)
-        print self.profile
         self.newWindow = Home(self.master)
+        
+
+class Home(Frame):
+    def __init__(self, master):
+        Frame.__init__(self)
+        self.Name = br.title()[:(br.title()).index(":")]
+        self.label_1 = Label(self, text=self.Name)
+        self.label_1.grid(row=0)
+        self.pack()
+        for i in range (0,n):
+            courses.append(box(root,i))
+
             
+        
+class box(Frame):
+    def __init__(self, master, number):
+        Frame.__init__(self)
+        self.var = IntVar()
+        self.checkbox = Checkbutton(self, text=coursename[number], variable= self.var)
+        self.checkbox.grid(row=1)
+        self.pack()
+
+courses=[]
 
 
 
-root.wm_title("Moodle Login")
-root.geometry("250x100")
+
+root.wm_title("MooDLD")
 root.iconbitmap('favicon.png')
 
 lf = LoginFrame(root)
