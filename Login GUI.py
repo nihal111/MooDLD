@@ -9,7 +9,16 @@ br = mechanize.Browser()
 print "Opening Moodle!"
 br.open(moodle)
 text_file = open("Cred.txt", "w")
+root = Tk()
 
+
+class Home(Frame):
+    def __init__(self, master):
+        Frame.__init__(self)
+        self.Name = br.title()[:(br.title()).index(":")]
+        self.label_1 = Label(self, text=self.Name)
+        self.label_1.grid(row=0, sticky=E)
+        self.pack() 
 
 class LoginFrame(Frame):
     def __init__(self, master):
@@ -51,15 +60,20 @@ class LoginFrame(Frame):
 
         if ((br.geturl()) == "http://moodle.iitb.ac.in/"):
             tm.showinfo("Login info", "Welcome!")
-            
+            for link in br.links(url_regex='http://moodle.iitb.ac.in/user/profile.php'):
+                self.profile = link.url
+            self.new_window()
+                        
         else:
             tm.showerror("Login error", "Incorrect username or password")
+            self.new_window()
             
+    def new_window(self):
+        self.destroy()
+        br.open (self.profile)
+        print self.profile
+        self.newWindow = Home(self.master)
             
 
-
-
-
-root = Tk()
 lf = LoginFrame(root)
 root.mainloop()
