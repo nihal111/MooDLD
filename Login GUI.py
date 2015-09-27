@@ -13,13 +13,14 @@ text_file = open("Cred.txt", "w")
 root = Tk()
 course = []
 coursename = []
-courses=[]
 save =[]
+courses=[]
 
 class savedata():
-    def __init__(self,url,directory):
+    def __init__(self,url,directory,name):
         self.url = url
         self.directory = directory
+        self.name = name
         
 class LoginFrame(Frame):
     def __init__(self, master):
@@ -85,8 +86,8 @@ class Sync(Frame):
         self.newWindow = Home(self.master)
     
     def __init__(self,master):
-        Frame.__init__(self)
-        self.Name = 'Welcome '+br.title()[:(br.title()).index(":")]
+        Frame.__init__(self)        
+        self.Name = 'Welcome '#+br.title()[:(br.title()).index(":")]
         self.label_1 = Label(self, text=self.Name, justify=LEFT)
         self.label_1.grid(row=0)
         self.sync= Button(self, text="Sync Files")
@@ -103,6 +104,7 @@ class Home(Frame):
             courses[i].checkbox.select()
             print courses[i].var.get()
     def dall(self):
+
         n= len(course)
         for i in range (0,n):
             courses[i].checkbox.deselect()
@@ -110,26 +112,37 @@ class Home(Frame):
 
             
     def save(self):
-        n= len(course)
-        text_file = open("Cred.txt", "w")
+        n= len(courses)
+        open("Preferences.txt","w").close()
+        preferences = open("Preferences.txt", "w")
         for i in range (0,n):
             x=str(courses[i].directory.get())
             if not(x.endswith("/")):
-                courses[i].directory.set(x+'/')                
-            save.append(savedata(course[i].url,courses[i].directory.get()))
-        
+                courses[i].directory.set(x+'/')
+            save.append(savedata(course[i].url,courses[i].directory.get(),coursename[i]))
+            preferences.write(save[i].name+'\n')
+            preferences.write(save[i].url+'\n')
+            preferences.write(save[i].directory+'\n')
+            courses[i].pack_forget()
+        preferences.close()
+        self.destroy()
+        self.newWindow = Sync(self.master)
 
 
             
     def __init__(self, master):
         Frame.__init__(self)
-        self.Name = 'Welcome '+br.title()[:(br.title()).index(":")]
+        self.Name = 'Welcome '#+br.title()[:(br.title()).index(":")]
         self.label_1 = Label(self, text=self.Name, justify=LEFT)
+        del courses[:]
+        del course[:]
+        del coursename[:]
+        del save[:]
         br.open('http://moodle.iitb.ac.in/')
         for link in br.links(url_regex='http://moodle.iitb.ac.in/course/view.php'):
                 course.append(link)
                 coursename.append(link.text)
-        print coursename
+        
         n= len(course)                
         self.label_1.grid(row=0, sticky=W)
         self.pack()
