@@ -47,6 +47,7 @@ class LoginFrame(Frame):
             text_file.write(self.entry_2.get()+'\n')
             text_file.close()
                     
+
         
         br.select_form( nr=0 )
         br['username']= '150040015' #self.entry_1.get()
@@ -96,7 +97,7 @@ class Home(Frame):
         for i in range (0,n):
             courses.append(box(root,i))
         self.selectall = Button(self, text="Select All", command= self.sall)     
-        self.selectall.grid(row=1,column=0,sticky = W)
+        self.selectall.grid(row=1,column=0)
         self.deselectall = Button(self, text="Deselect All", command= self.dall)     
         self.deselectall.grid(row=1, column =1)
         self.pack(fill =X)
@@ -108,16 +109,19 @@ class box(Frame):
     def getdir(self):
         directory = tkFileDialog.askdirectory(parent=root, title='Please select a directory')
         if len(directory) >0:
-            print directory
+            self.directory.set(directory)
         
         
     def __init__(self, master, number):
         Frame.__init__(self)
         self.var = IntVar()
+        self.directory=StringVar()
         self.checkbox = Checkbutton(self, text=coursename[number],width= 40, variable= self.var)
         self.checkbox.grid(row=number+1,sticky=W)
         self.browse = Button(self, text ="Browse", command= self.getdir)
         self.browse.grid(row=number+1,column =5, sticky = E)
+        self.label_dir = Label(self,textvariable=self.directory)
+        self.label_dir.grid(row=number+1 , column=6)
         self.pack(fill =X,anchor= "w")
 
 root.wm_title("MooDLD")
