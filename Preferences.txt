@@ -1,42 +1,42 @@
 PH 117-2015-1-P18 Physics Lab
 http://moodle.iitb.ac.in/course/view.php?id=1883
-C:/
+D:/Moodle/PH 117/
 PH 107-2015-1-D4 Quantum Physics and application
 http://moodle.iitb.ac.in/course/view.php?id=1879
-C:/Users/laptop/Desktop/moodld/
+D:/Moodle/PH 107/
 ME 113-2015-1-P18 Workshop Practice
 http://moodle.iitb.ac.in/course/view.php?id=1850
-C:/
+D:/Moodle/ME 113/
 MA 105-2015-1-D4 Calculus
 http://moodle.iitb.ac.in/course/view.php?id=1842
-C:/
+D:/Moodle/MA 105/
 CH 107-2015-1-D4 Physical Chemistry
 http://moodle.iitb.ac.in/course/view.php?id=1797
-C:/
+D:/Moodle/CH 107/
 CH 105-2015-1-D4 Organic & Inorganic Chemistry
 http://moodle.iitb.ac.in/course/view.php?id=1793
-C:/
+D:/Moodle/CH 105/
 BB 101-2015-1-D4 Biology
 http://moodle.iitb.ac.in/course/view.php?id=1775
-C:/
+D:/Moodle/BB 101/
 PH 117-2015-1 Physics Lab
 http://moodle.iitb.ac.in/course/view.php?id=1741
-C:/
+D:/Moodle/PH 117/
 PH 107-2015-1 Quantum Physics and application
 http://moodle.iitb.ac.in/course/view.php?id=1740
-C:/
+D:/Moodle/PH 107/
 ME 113-2015-1 Workshop Practice
 http://moodle.iitb.ac.in/course/view.php?id=1654
-C:/
+D:/Moodle/ME 113/
 MA 105-2015-1 Calculus
 http://moodle.iitb.ac.in/course/view.php?id=1628
-C:/
+D:/Moodle/MA 105/
 CH 107-2015-1 Physical Chemistry
 http://moodle.iitb.ac.in/course/view.php?id=1344
-C:/
+D:/Moodle/CH 107/
 CH 105-2015-1 Organic & Inorganic Chemistry
 http://moodle.iitb.ac.in/course/view.php?id=1343
-C:/
+D:/Moodle/CH 105/
 BB 101-2015-1 Biology
 http://moodle.iitb.ac.in/course/view.php?id=1268
-C:/
+D:/Moodle/BB 101/

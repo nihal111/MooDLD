@@ -3,6 +3,7 @@ import tkMessageBox as tm
 import mechanize
 import time
 import tkFileDialog
+import os
 
 start_time = time.time()
 moodle = 'http://moodle.iitb.ac.in/login/index.php'
@@ -15,6 +16,7 @@ course = []
 coursename = []
 save =[]
 courses=[]
+downloaded= []
 myname = ""
 
 class savedata():
@@ -49,13 +51,14 @@ class LoginFrame(Frame):
        
         print "Attempting login..."        
         br.open(moodle)
+        
         if (self.var.get() ):
+            text_file.write(str(self.var.get())+'\n')
             text_file.write(self.entry_1.get()+'\n')
             text_file.write(self.entry_2.get()+'\n')
-            text_file.close()
-                    
-
-        
+        else:                       
+            text_file.write(str(self.var.get())+'\n')
+        text_file.close()        
         br.select_form( nr=0 )
         br['username']= '150040015' #self.entry_1.get()
         br['password']= 'npain!!!'  #self.entry_2.get()
@@ -63,10 +66,15 @@ class LoginFrame(Frame):
         br.submit()
 
         if ((br.geturl()) == "http://moodle.iitb.ac.in/"):
-            tm.showinfo("Login info", "Welcome!")
+            
             for link in br.links(url_regex='http://moodle.iitb.ac.in/user/profile.php'):
                 self.profile = link.url
+            br.open (self.profile)
+            global myname
+            myname = br.title()[:(br.title()).index(":")]
+            tm.showinfo("Login info", "Welcome "+myname+"!" )
             self.new_window()
+            print "Successful Login!"
                         
         else:
             tm.showerror("Login error", "Incorrect username or password")
@@ -74,14 +82,57 @@ class LoginFrame(Frame):
             
     def new_window(self):
         self.destroy()
-        br.open (self.profile)
-        global myname
-        myname = br.title()[:(br.title()).index(":")]
         self.newWindow = Sync(self.master)
 
 
 class Sync(Frame):
-    #def sync(self):
+    
+    def retrieve(self, url, directory):
+        self.links = []
+        global downloaded
+        br.open(url)
+        for link in br.links(url_regex="."):
+            if ((not (link.url.startswith('http://moodle.iitb.ac.in/login/logout.php'))) and (not (link.url).startswith(br.geturl())) and (not (link.url).startswith('#')) and link.url not in downloaded):
+                self.links.append(link)
+
+        for link in self.links:
+            br.open(link.url)
+            if ((br.geturl()).endswith('.pdf') or (br.geturl()).endswith('forcedownload=1')):
+                
+                if (']' in link.text):
+                    if not os.path.exists(directory+link.text[(link.text).index("]")+1:]+'.pdf'):
+                        print "Downloading " + link.text[(link.text).index("]")+1:]+'.pdf' + " to " + directory
+                        br.retrieve(link.url,directory+link.text[(link.text).index("]")+1:]+'.pdf')
+                                    
+            else:
+                if ((br.geturl()).startswith('http://moodle.iitb.ac.in/mod/folder') and (link.url not in downloaded) and (link.text).startswith('[IMG]')):
+                    foldername = br.title()[(br.title()).index(":")+2:]
+                    newpath = directory + foldername
+                    if not os.path.exists(newpath): os.makedirs(newpath)
+                    print  "Retrieving from "+ foldername + " at " + newpath 
+                    downloaded.append(link.url)
+                    self.retrieve(link.url, newpath+'/')
+                    
+                    
+            br.back()
+
+
+    def dld(self):
+        urls =[]
+        directories= []
+        
+        file_pref=open("Preferences.txt",'r')
+        lines = file_pref.readlines()
+        n= len(lines)/3
+        if(len(lines)):
+
+            for number in range (0,n):
+               urls.append((lines[3*number+1])[:lines[3*number+1].index("\n")])
+               directories.append((lines[3*number+2])[:lines[3*number+2].index("\n")])
+               print  "Retrieving from "+ (lines[3*number])[:lines[3*number].index("\n")] + " at " + directories[number]
+               self.retrieve(urls[number], directories[number])
+        print "Moodle is up-to-date!"
+
         
 
     def pref(self):
@@ -90,11 +141,10 @@ class Sync(Frame):
     
     def __init__(self,master):
         Frame.__init__(self)
-        print myname
         self.Name = 'Welcome '+ str(myname)
         self.label_1 = Label(self, text=self.Name, justify=LEFT)
         self.label_1.grid(row=0)
-        self.sync= Button(self, text="Sync Files")
+        self.sync= Button(self, text="DLD Files",command= self.dld)
         self.sync.grid(row=1)
         self.pref=Button(self, text="Preferences", command = self.pref)
         self.pref.grid(row=2)
@@ -136,7 +186,8 @@ class Home(Frame):
             
     def __init__(self, master):
         Frame.__init__(self)
-        self.Name = 'Welcome '+br.title()[:(br.title()).index(":")]
+        global myname
+        self.Name = 'Welcome '+myname
         self.label_1 = Label(self, text=self.Name, justify=CENTER)
         del courses[:]
         del course[:]
