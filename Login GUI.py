@@ -10,17 +10,20 @@ moodle = 'http://moodle.iitb.ac.in/login/index.php'
 br = mechanize.Browser()
 print "Opening Moodle!"
 
-
+TotalInMoodle=0
+TotalInPreferences=0
 root = Tk()
 course = []
 coursename = []
 save =[]
 courses=[]
 downloaded= []
+downloadlinks=[]
 myname = ""
 
 class savedata():
-    def __init__(self,url,directory,name):
+    def __init__(self,chkbox,url,directory,name):
+        self.chkbox = chkbox
         self.url = url
         self.directory = directory
         self.name = name
@@ -116,6 +119,7 @@ class Sync(Frame):
     def retrieve(self, url, directory):
         self.links = []
         global downloaded
+        global downloadlinks
         br.open(url)
         for link in br.links(url_regex="."):
             if ((not (link.url.startswith('http://moodle.iitb.ac.in/login/logout.php'))) and (not (link.url).startswith(br.geturl())) and (not (link.url).startswith('#')) and link.url not in downloaded):
@@ -127,8 +131,16 @@ class Sync(Frame):
                 
                 if (']' in link.text):
                     if not os.path.exists(directory+link.text[(link.text).index("]")+1:]+'.pdf'):
+                      if not (link.url in downloadlinks):  
                         print "Downloading " + link.text[(link.text).index("]")+1:]+'.pdf' + " to " + directory
                         br.retrieve(link.url,directory+link.text[(link.text).index("]")+1:]+'.pdf')
+                        downloadlinks.append(link.url)
+                else:
+                    if not os.path.exists(directory+link.text+'.pdf'):
+                      if not (link.url in downloadlinks):
+                        print "Downloading " + link.text+'.pdf' + " to " + directory
+                        br.retrieve(link.url,directory+link.text+'.pdf')
+                        downloadlinks.append(link.url)
                                     
             else:
                 if ((br.geturl()).startswith('http://moodle.iitb.ac.in/mod/folder') and (link.url not in downloaded) and (link.text).startswith('[IMG]')):
@@ -138,6 +150,9 @@ class Sync(Frame):
                     print  "Retrieving from "+ foldername + " at " + newpath 
                     downloaded.append(link.url)
                     self.retrieve(link.url, newpath+'/')
+                if ((br.geturl()).startswith('http://moodle.iitb.ac.in/mod/assign') and (link.url not in downloaded)):
+                    downloaded.append(link.url)
+                    self.retrieve(link.url, directory)
                     
                     
             br.back()
@@ -146,18 +161,21 @@ class Sync(Frame):
     def dld(self):
         urls =[]
         directories= []
-        
-        file_pref=open("Preferences.txt",'r')
-        lines = file_pref.readlines()
-        n= len(lines)/3
-        if(len(lines)):
+        if os.path.exists("Preferences.txt"):
+            file_pref=open("Preferences.txt",'r')
+            lines = file_pref.readlines()
+            n= len(lines)/4
+            if(len(lines)):
 
-            for number in range (0,n):
-               urls.append((lines[3*number+1])[:lines[3*number+1].index("\n")])
-               directories.append((lines[3*number+2])[:lines[3*number+2].index("\n")])
-               print  "Retrieving from "+ (lines[3*number])[:lines[3*number].index("\n")] + " at " + directories[number]
-               self.retrieve(urls[number], directories[number])
-        print "Moodle is up-to-date!"
+                for number in range (0,n):
+                    urls.append((lines[4*number+2])[:lines[4*number+2].index("\n")])
+                    directories.append((lines[4*number+3])[:lines[4*number+3].index("\n")])
+                    if ((lines[4*number])[:lines[4*number].index("\n")]=='1'):
+                        print "Retrieving from "+ ((lines[4*number+1])[:lines[4*number+1].index("\n")]) + " at " + directories[number]
+                        self.retrieve(urls[number], directories[number])
+            print "Moodle is up-to-date!"
+        else:
+            self.pref()
 
         
 
@@ -192,13 +210,13 @@ class Home(Frame):
         n= len(course)
         for i in range (0,n):
             courses[i].checkbox.select()
-            print courses[i].var.get()
+            
     def dall(self):
 
         n= len(course)
         for i in range (0,n):
             courses[i].checkbox.deselect()
-            print courses[i].var.get()
+           
 
             
     def save(self):
@@ -209,13 +227,15 @@ class Home(Frame):
             x=str(courses[i].directory.get())
             if not(x.endswith("/")):
                 courses[i].directory.set(x+'/')
-            save.append(savedata(course[i].url,courses[i].directory.get(),coursename[i]))
+            save.append(savedata(courses[i].var.get(), course[i].url,courses[i].directory.get(),coursename[i]))
+            preferences.write(str(save[i].chkbox)+'\n')
             preferences.write(save[i].name+'\n')
             preferences.write(save[i].url+'\n')
             preferences.write(save[i].directory+'\n')
             courses[i].pack_forget()
         preferences.close()
         self.destroy()
+        
         self.newWindow = Sync(self.master)
 
 
@@ -233,7 +253,8 @@ class Home(Frame):
         for link in br.links(url_regex='http://moodle.iitb.ac.in/course/view.php'):
                 course.append(link)
                 coursename.append(link.text)
-        
+        global TotalInMoodle
+        TotalInMoodle = len(course)
         n= len(course)                
         self.label_1.grid(row=0, sticky=W)
         self.pack()
@@ -261,19 +282,6 @@ class box(Frame):
         Frame.__init__(self)
         self.var = IntVar()
         self.directory=StringVar()
-        try:
-            with open('Preferences.txt') as file:
-                pass
-            file_pref=open("Preferences.txt",'r')
-            lines = file_pref.readlines()
-            if(str(coursename[number]) in str(lines[3*number])):
-                self.directory.set((lines[3*number+2])[:lines[3*number+2].index("\n")])
-                
-            else:
-                self.directory.set("C:/")
-        except IOError as e:
-                                    
-            self.directory.set("C:/")
         self.checkbox = Checkbutton(self, text=coursename[number],width= 40, variable= self.var)
         self.checkbox.grid(row=number+1,sticky=W,pady=5)
         self.browse = Button(self, text ="Browse", command= self.getdir)
@@ -281,7 +289,25 @@ class box(Frame):
         self.label_dir = Label(self,textvariable=self.directory)
         self.label_dir.grid(row=number+1 , column=6,pady=5)
         
+        if os.path.exists("Preferences.txt"): 
+            file_pref=open("Preferences.txt",'r')
+            lines = file_pref.readlines()
+            global TotalInPreferences
+            global TotalInMoodle
+            TotalInPreferences = len(lines)/4
+            if (TotalInMoodle==TotalInPreferences):
+                if(str(coursename[number]) in str(lines[4*number+1])):
+                    self.directory.set((lines[4*number+3])[:lines[4*number+3].index("\n")])
+                if ((lines[4*number])[:lines[4*number].index("\n")]=='1'):
+                        self.checkbox.select()
+                                    
+                else:
+                    self.directory.set("C:/")
+            
+        else:
+            self.directory.set("C:/")
         
+              
         self.pack(fill =X,anchor= "w")
 
 root.wm_title("MooDLD")
