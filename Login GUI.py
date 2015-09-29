@@ -9,8 +9,8 @@ start_time = time.time()
 moodle = 'http://moodle.iitb.ac.in/login/index.php'
 br = mechanize.Browser()
 print "Opening Moodle!"
-br.open(moodle)
-text_file = open("Cred.txt", "w")
+
+
 root = Tk()
 course = []
 coursename = []
@@ -44,14 +44,40 @@ class LoginFrame(Frame):
         
         self.logbtn = Button(self, text="Login", command = self._login_btn_clickked)
         self.logbtn.grid(columnspan=2)
-
+        
         self.pack()
-
+        global br
+        br = mechanize.Browser()
+        br.open('http://moodle.iitb.ac.in/login/index.php')
+        if os.path.exists("Cred.txt"):
+            Cred = open("Cred.txt", "r")
+            cred = Cred.readlines()
+            
+            if (int(cred[0][0])==1):
+                br.open(moodle)
+                br.select_form( nr=0 )
+                br['username']= str(cred[1][:cred[1].index("\n")])
+                br['password']= str(cred[2][:cred[2].index("\n")])
+                br.submit()
+                if ((br.geturl()) == "http://moodle.iitb.ac.in/"):
+                
+                    for link in br.links(url_regex='http://moodle.iitb.ac.in/user/profile.php'):
+                        self.profile = link.url
+                    br.open (self.profile)
+                    global myname
+                    myname = br.title()[:(br.title()).index(":")]
+                    tm.showinfo("Login info", "Welcome "+myname+"!" )
+                    self.new_window()
+                    print "Successful Login!"
+                else:
+                    tm.showerror("Login error", "Incorrect username or password")
+                    
+       
     def _login_btn_clickked(self):
        
-        print "Attempting login..."        
-        br.open(moodle)
+        print "Attempting login..."
         
+        text_file = open("Cred.txt", "w")
         if (self.var.get() ):
             text_file.write(str(self.var.get())+'\n')
             text_file.write(self.entry_1.get()+'\n')
@@ -60,8 +86,8 @@ class LoginFrame(Frame):
             text_file.write(str(self.var.get())+'\n')
         text_file.close()        
         br.select_form( nr=0 )
-        br['username']= '150040015' #self.entry_1.get()
-        br['password']= 'npain!!!'  #self.entry_2.get()
+        br['username']= self.entry_1.get()
+        br['password']= self.entry_2.get()
        
         br.submit()
 
@@ -138,6 +164,14 @@ class Sync(Frame):
     def pref(self):
         self.destroy()
         self.newWindow = Home(self.master)
+
+    def logout(self):
+        text_file = open("Cred.txt", "w")
+        text_file.write('0\n')
+        text_file.close()
+        br.close()
+        self.destroy()
+        self.newWindow = LoginFrame(self.master)
     
     def __init__(self,master):
         Frame.__init__(self)
@@ -148,6 +182,8 @@ class Sync(Frame):
         self.sync.grid(row=1)
         self.pref=Button(self, text="Preferences", command = self.pref)
         self.pref.grid(row=2)
+        self.pref=Button(self, text="Logout", command = self.logout)
+        self.pref.grid(row=3)
         self.pack()
         
 
