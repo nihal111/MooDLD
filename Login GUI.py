@@ -4,15 +4,16 @@ import mechanize
 import time
 import tkFileDialog
 import os
+import logging
+import Tkinter as Tkinter
 
-start_time = time.time()
 moodle = 'http://moodle.iitb.ac.in/login/index.php'
 br = mechanize.Browser()
-print "Opening Moodle!"
+
 
 TotalInMoodle=0
 TotalInPreferences=0
-root = Tk()
+
 course = []
 coursename = []
 save =[]
@@ -20,6 +21,36 @@ courses=[]
 downloaded= []
 downloadlinks=[]
 myname = ""
+
+class TraceConsole():
+
+    def __init__(self):
+        # Init the main GUI window
+        self._logFrame = Tkinter.Frame()
+        self._log      = Tkinter.Text(self._logFrame, wrap=Tkinter.NONE, setgrid=True, height =5, width= 70)
+        self._scrollb  = Tkinter.Scrollbar(self._logFrame, orient=Tkinter.VERTICAL)
+        self._scrollb.config(command = self._log.yview) 
+        self._log.config(yscrollcommand = self._scrollb.set)
+        self._scrolla  = Tkinter.Scrollbar(self._logFrame, orient=Tkinter.HORIZONTAL)
+        self._scrolla.config(command = self._log.xview) 
+        self._log.config(xscrollcommand = self._scrolla.set)
+        # Grid & Pack
+        self._log.grid(column=0, row=0)
+        self._scrollb.grid(column=1, row=0, sticky=Tkinter.S+Tkinter.N)
+        self._scrolla.grid(column=0, row=5, sticky=Tkinter.E+Tkinter.W)
+        self._logFrame.pack()
+
+
+    def log(self, msg, level=None):
+        # Write on GUI
+        self._log.insert('end', msg + '\n')
+
+    def exitWindow(self):
+        # Exit the GUI window and close log file
+        print('exit..')
+        
+m = Tkinter.Tk()
+t = TraceConsole()
 
 class savedata():
     def __init__(self,chkbox,url,directory,name):
@@ -47,11 +78,14 @@ class LoginFrame(Frame):
         
         self.logbtn = Button(self, text="Login", command = self._login_btn_clickked)
         self.logbtn.grid(columnspan=2)
-        
+
         self.pack()
+        
         global br
+        global t
         br = mechanize.Browser()
         br.open('http://moodle.iitb.ac.in/login/index.php')
+        t.log("Opening Moodle...")
         if os.path.exists("Cred.txt"):
             Cred = open("Cred.txt", "r")
             cred = Cred.readlines()
@@ -71,9 +105,10 @@ class LoginFrame(Frame):
                     myname = br.title()[:(br.title()).index(":")]
                     tm.showinfo("Login info", "Welcome "+myname+"!" )
                     self.new_window()
-                    print "Successful Login!"
+                    t.log("Successful Login as "+myname)
                 else:
                     tm.showerror("Login error", "Incorrect username or password")
+                    
                     
        
     def _login_btn_clickked(self):
@@ -107,7 +142,7 @@ class LoginFrame(Frame):
                         
         else:
             tm.showerror("Login error", "Incorrect username or password")
-            self.new_window()
+            
             
     def new_window(self):
         self.destroy()
@@ -117,12 +152,14 @@ class LoginFrame(Frame):
 class Sync(Frame):
     
     def retrieve(self, url, directory):
+        m.update()
+        global t
         self.links = []
         global downloaded
         global downloadlinks
         br.open(url)
         for link in br.links(url_regex="."):
-            if ((not (link.url.startswith('http://moodle.iitb.ac.in/login/logout.php'))) and (not (link.url).startswith(br.geturl())) and (not (link.url).startswith('#')) and link.url not in downloaded):
+            if ((not (link.url.startswith('http://moodle.iitb.ac.in/login/logout.php'))) and (not (link.url).startswith(br.geturl())) and (not (link.url).startswith('#')) and (not (link.url).startswith('http://moodle.iitb.ac.in/mod/forum')) and (not (link.url).startswith('http://moodle.iitb.ac.in/my')) and (not (link.url).startswith('http://moodle.iitb.ac.in/user')) and (not (link.url).startswith('http://moodle.iitb.ac.in/badges')) and (not (link.url).startswith('http://moodle.iitb.ac.in/calendar')) and (not (link.url).startswith('http://moodle.iitb.ac.in/grade')) and (not (link.url).startswith('http://moodle.iitb.ac.in/message'))and link.url not in downloaded):
                 self.links.append(link)
 
         for link in self.links:
@@ -132,13 +169,13 @@ class Sync(Frame):
                 if (']' in link.text):
                     if not os.path.exists(directory+link.text[(link.text).index("]")+1:]+'.pdf'):
                       if not (link.url in downloadlinks):  
-                        print "Downloading " + link.text[(link.text).index("]")+1:]+'.pdf' + " to " + directory
+                        t.log("Downloading " + link.text[(link.text).index("]")+1:]+'.pdf' + " to " + directory)
                         br.retrieve(link.url,directory+link.text[(link.text).index("]")+1:]+'.pdf')
                         downloadlinks.append(link.url)
                 else:
                     if not os.path.exists(directory+link.text+'.pdf'):
                       if not (link.url in downloadlinks):
-                        print "Downloading " + link.text+'.pdf' + " to " + directory
+                        t.log("Downloading " + link.text+'.pdf' + " to " + directory)
                         br.retrieve(link.url,directory+link.text+'.pdf')
                         downloadlinks.append(link.url)
                                     
@@ -147,7 +184,7 @@ class Sync(Frame):
                     foldername = br.title()[(br.title()).index(":")+2:]
                     newpath = directory + foldername
                     if not os.path.exists(newpath): os.makedirs(newpath)
-                    print  "Retrieving from "+ foldername + " at " + newpath 
+                    t.log("Retrieving from "+ foldername + " at " + newpath )
                     downloaded.append(link.url)
                     self.retrieve(link.url, newpath+'/')
                 if ((br.geturl()).startswith('http://moodle.iitb.ac.in/mod/assign') and (link.url not in downloaded)):
@@ -156,9 +193,12 @@ class Sync(Frame):
                     
                     
             br.back()
+            self.pack()           
 
 
     def dld(self):
+        global t
+        start_time = time.time()
         urls =[]
         directories= []
         if os.path.exists("Preferences.txt"):
@@ -171,13 +211,14 @@ class Sync(Frame):
                     urls.append((lines[4*number+2])[:lines[4*number+2].index("\n")])
                     directories.append((lines[4*number+3])[:lines[4*number+3].index("\n")])
                     if ((lines[4*number])[:lines[4*number].index("\n")]=='1'):
-                        print "Retrieving from "+ ((lines[4*number+1])[:lines[4*number+1].index("\n")]) + " at " + directories[number]
+                        t.log("Retrieving from "+ ((lines[4*number+1])[:lines[4*number+1].index("\n")]) + " at " + directories[number])
                         self.retrieve(urls[number], directories[number])
             print "Moodle is up-to-date!"
+            totaltime= time.time() - start_time
+            t.log("Time Taken: " + str(int(totaltime/60)) +" minutes and " + str(int(totaltime%60)) + " seconds!")
         else:
             self.pref()
-
-        
+                
 
     def pref(self):
         self.destroy()
@@ -259,7 +300,7 @@ class Home(Frame):
         self.label_1.grid(row=0, sticky=W)
         self.pack()
         for i in range (0,n):
-            courses.append(box(root,i))
+            courses.append(box(m,i))
         self.selectall = Button(self, text="Select All", command= self.sall)     
         self.selectall.grid(row=1,column=0)
         self.deselectall = Button(self, text="Deselect All", command= self.dall)     
@@ -273,7 +314,7 @@ class Home(Frame):
         
 class box(Frame):
     def getdir(self):
-        directory = tkFileDialog.askdirectory(parent=root,initialdir ="C:/", title='Please select a directory')
+        directory = tkFileDialog.askdirectory(parent=m,initialdir ="C:/", title='Please select a directory')
         if len(directory) >0:
             self.directory.set(directory)
         
@@ -296,12 +337,12 @@ class box(Frame):
             global TotalInMoodle
             TotalInPreferences = len(lines)/4
             if (TotalInMoodle==TotalInPreferences):
-                if(str(coursename[number]) in str(lines[4*number+1])):
-                    self.directory.set((lines[4*number+3])[:lines[4*number+3].index("\n")])
                 if ((lines[4*number])[:lines[4*number].index("\n")]=='1'):
                         self.checkbox.select()
-                                    
+                if(str(coursename[number]) in str(lines[4*number+1])):
+                    self.directory.set((lines[4*number+3])[:lines[4*number+3].index("\n")])                    
                 else:
+                    print "here"
                     self.directory.set("C:/")
             
         else:
@@ -310,8 +351,8 @@ class box(Frame):
               
         self.pack(fill =X,anchor= "w")
 
-root.wm_title("MooDLD")
-root.iconbitmap('favicon.png')
+m.wm_title("MooDLD")
+m.iconbitmap('favicon.png')
 
-lf = LoginFrame(root)
-root.mainloop()
+LoginFrame(m)
+m.mainloop()

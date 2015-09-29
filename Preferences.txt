@@ -1,7 +1,7 @@
-0
+1
 PH 117-2015-1-P18 Physics Lab
 http://moodle.iitb.ac.in/course/view.php?id=1883
-C:/
+D:/Moodle/PH 117/
 1
 PH 107-2015-1-D4 Quantum Physics and application
 http://moodle.iitb.ac.in/course/view.php?id=1879
@@ -10,10 +10,10 @@ D:/Moodle/PH 107/
 ME 113-2015-1-P18 Workshop Practice
 http://moodle.iitb.ac.in/course/view.php?id=1850
 C:/
-0
+1
 MA 105-2015-1-D4 Calculus
 http://moodle.iitb.ac.in/course/view.php?id=1842
-C:/
+D:/Moodle/MA 105/
 0
 CH 107-2015-1-D4 Physical Chemistry
 http://moodle.iitb.ac.in/course/view.php?id=1797
