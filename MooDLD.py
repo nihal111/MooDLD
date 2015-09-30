@@ -69,7 +69,7 @@ class VerticalScrolledFrame(Frame):
 
 
 
-class TraceConsole():
+class TraceConsole():       #Log Messages
 
     def __init__(self):
         # Init the main GUI window
@@ -99,7 +99,7 @@ class TraceConsole():
 m = Tkinter.Tk()
 t = TraceConsole()
 
-class savedata():
+class savedata():                                     
     def __init__(self,chkbox,url,directory,name):
         self.chkbox = chkbox
         self.url = url
@@ -191,7 +191,7 @@ class LoginFrame(Frame):
             myname = br.title()[:(br.title()).index(":")]
             tm.showinfo("Login info", "Welcome "+myname+"!" )
             self.new_window()
-            t.log("Successful Login!")
+            t.log("Login Successful!")
                         
         else:
             tm.showerror("Login error", "Incorrect username or password")
@@ -283,29 +283,29 @@ class Sync(Frame):
         text_file = open("Cred.txt", "w")
         text_file.write('0\n')
         text_file.close()
+        t.log("Logout successful!")
         br.close()
         self.destroy()
         self.newWindow = LoginFrame(self.master)
     
     def __init__(self,master):
         Frame.__init__(self)
+        self.pack()
         self.Name = 'Welcome '+ str(myname)
         self.label_1 = Label(self, text=self.Name, justify=LEFT)
-        self.label_1.grid(row=0)
+        self.label_1.grid(row=0,pady=5)
         self.sync= Button(self, text="DLD Files",command= self.dld)
-        self.sync.grid(row=1)
+        self.sync.grid(row=1,pady=5)
         self.pref=Button(self, text="Preferences", command = self.pref)
-        self.pref.grid(row=2)
+        self.pref.grid(row=2,pady=5)
         self.pref=Button(self, text="Logout", command = self.logout)
-        self.pref.grid(row=3)
-        self.label_1 = Label(self, text='Made By:', justify=RIGHT, anchor= 'e', width =80)
-        self.label_1.grid(row=4)
-        self.label_1 = Label(self, text='Nihal Singh' ,justify=RIGHT, anchor= 'e', width =80)
-        self.label_1.grid(row=5)
-        self.label_1 = Label(self, text='Arpan Banerjee', justify=RIGHT, anchor= 'e', width =80)
-        self.label_1.grid(row=6)
-        
-        self.pack()
+        self.pref.grid(row=3,pady=5)
+        self.label_2 = Label(self, text='Made By:', justify=RIGHT, anchor= 'e', width =80)
+        self.label_2.grid(row=4,padx=[0,80])
+        self.label_3 = Label(self, text='Nihal Singh' ,justify=RIGHT, anchor= 'e', width =80)
+        self.label_3.grid(row=5,padx=[40,0])
+        self.label_3 = Label(self, text='Arpan Banerjee', justify=RIGHT, anchor= 'e', width =80)
+        self.label_3.grid(row=6,padx=[50,0])
         
 
 class Home(Frame):
@@ -315,12 +315,10 @@ class Home(Frame):
             courses[i].checkbox.select()
             
     def dall(self):
-
         n= len(course)
         for i in range (0,n):
             courses[i].checkbox.deselect()
            
-
             
     def save(self):
         n= len(courses)
@@ -337,16 +335,13 @@ class Home(Frame):
             preferences.write(save[i].directory+'\n')
             courses[i].pack_forget()
         preferences.close()
-        self.destroy()
-        
-        self.newWindow = Sync(self.master)
-
+        self.frame.destroy()        
+        self.newWindow = Sync(m)
 
             
     def __init__(self, master):
-        Frame.__init__(self)
-        global myname
-        
+        #Frame.__init__(self)
+        global myname        
         del courses[:]
         del course[:]
         del coursename[:]
@@ -361,21 +356,19 @@ class Home(Frame):
         
         self.frame = VerticalScrolledFrame(m)
         self.frame.pack()
-         
-        
         self.Name = 'Welcome '+myname
         self.label_1 = Label(self.frame.interior, text=self.Name, justify=CENTER)
-        self.label_1.pack(anchor ='w', fill=X)
+        self.label_1.grid(row=0,column=0,columnspan=3)
         
         for i in range (0,n):
             courses.append(box(self.frame,i))
             
         self.selectall = Button(self.frame.interior, text="Select All", command= self.sall)     
-        self.selectall.pack(anchor ='w', fill=X,side=LEFT)
+        self.selectall.grid(row=1,column=0)
         self.deselectall = Button(self.frame.interior, text="Deselect All", command= self.dall)     
-        self.deselectall.pack(anchor ='w', fill=X, side = RIGHT)
+        self.deselectall.grid(row=1,column=1,padx=[0,100])
         self.save = Button(self.frame.interior, text="Save Settings", command= self.save)     
-        self.save.pack(anchor ='w', fill=X,side =RIGHT)
+        self.save.grid(row=1,column=2)
         
         
             
@@ -392,11 +385,9 @@ class box(Frame):
         self.var = IntVar()
         self.directory=StringVar()
         self.checkbox = Checkbutton(master.interior, text=coursename[number],width= 40, variable= self.var)
-        self.checkbox.pack(anchor ='w', fill=X,side=BOTTOM)
+        self.checkbox.grid(row=number+3,column=0)
         self.browse = Button(master.interior, text ="Browse", command= self.getdir)
-        self.browse.pack(anchor ='w', fill=X,side=BOTTOM)
-        self.label_dir = Label(master.interior,textvariable=self.directory)
-        self.label_dir.pack(anchor ='w', fill=X,side=BOTTOM)
+        self.browse.grid(row=number+3,column=1)
         
         if os.path.exists("Preferences.txt"): 
             file_pref=open("Preferences.txt",'r')
@@ -415,9 +406,11 @@ class box(Frame):
             
         else:
             self.directory.set("C:/")
+
+        self.label_dir = Label(master.interior,textvariable=self.directory)
+        self.label_dir.grid(row=number+3,column=2)
         
               
-        self.pack(fill =X,anchor= "w")
 
 m.wm_title("MooDLD")
 try:
