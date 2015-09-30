@@ -22,6 +22,53 @@ downloaded= []
 downloadlinks=[]
 myname = ""
 
+
+class VerticalScrolledFrame(Frame):
+    """A pure Tkinter scrollable frame that actually works!
+    * Use the 'interior' attribute to place widgets inside the scrollable frame
+    * Construct and pack/place/grid normally
+    * This frame only allows vertical scrolling
+
+    """
+    def __init__(self, parent, *args, **kw):
+        Frame.__init__(self, parent, *args, **kw)            
+
+        # create a canvas object and a vertical scrollbar for scrolling it
+        vscrollbar = Scrollbar(self, orient=VERTICAL)
+        vscrollbar.pack(fill=Y, side=RIGHT, expand=FALSE)
+        canvas = Canvas(self, bd=0, highlightthickness=0,
+                        yscrollcommand=vscrollbar.set)
+        canvas.pack(side=LEFT, fill=BOTH, expand=TRUE)
+        vscrollbar.config(command=canvas.yview)
+
+        # reset the view
+        canvas.xview_moveto(0)
+        canvas.yview_moveto(0)
+
+        # create a frame inside the canvas which will be scrolled with it
+        self.interior = interior = Frame(canvas)
+        interior_id = canvas.create_window(0, 0, window=interior,
+                                           anchor=NW)
+
+        # track changes to the canvas and frame width and sync them,
+        # also updating the scrollbar
+        def _configure_interior(event):
+            # update the scrollbars to match the size of the inner frame
+            size = (interior.winfo_reqwidth(), interior.winfo_reqheight())
+            canvas.config(scrollregion="0 0 %s %s" % size)
+            if interior.winfo_reqwidth() != canvas.winfo_width():
+                # update the canvas's width to fit the inner frame
+                canvas.config(width=interior.winfo_reqwidth())
+        interior.bind('<Configure>', _configure_interior)
+
+        def _configure_canvas(event):
+            if interior.winfo_reqwidth() != canvas.winfo_width():
+                # update the inner frame's width to fill the canvas
+                canvas.itemconfigure(interior_id, width=canvas.winfo_width())
+        canvas.bind('<Configure>', _configure_canvas)
+
+
+
 class TraceConsole():
 
     def __init__(self):
@@ -299,8 +346,7 @@ class Home(Frame):
     def __init__(self, master):
         Frame.__init__(self)
         global myname
-        self.Name = 'Welcome '+myname
-        self.label_1 = Label(self, text=self.Name, justify=CENTER)
+        
         del courses[:]
         del course[:]
         del coursename[:]
@@ -311,20 +357,27 @@ class Home(Frame):
                 coursename.append(link.text)
         global TotalInMoodle
         TotalInMoodle = len(course)
-        n= len(course)                
-        self.label_1.grid(row=0, sticky=W)
-        self.pack()
-        for i in range (0,n):
-            courses.append(box(m,i))
-        self.selectall = Button(self, text="Select All", command= self.sall)     
-        self.selectall.grid(row=1,column=0)
-        self.deselectall = Button(self, text="Deselect All", command= self.dall)     
-        self.deselectall.grid(row=1, column =1)
-        self.save = Button(self, text="Save Settings", command= self.save)     
-        self.save.grid(row=1,column=2,padx=60)
-        self.pack(fill =X)
+        n= len(course)
         
-
+        self.frame = VerticalScrolledFrame(m)
+        self.frame.pack()
+         
+        
+        self.Name = 'Welcome '+myname
+        self.label_1 = Label(self.frame.interior, text=self.Name, justify=CENTER)
+        self.label_1.pack(anchor ='w', fill=X)
+        
+        for i in range (0,n):
+            courses.append(box(self.frame,i))
+            
+        self.selectall = Button(self.frame.interior, text="Select All", command= self.sall)     
+        self.selectall.pack(anchor ='w', fill=X,side=LEFT)
+        self.deselectall = Button(self.frame.interior, text="Deselect All", command= self.dall)     
+        self.deselectall.pack(anchor ='w', fill=X, side = RIGHT)
+        self.save = Button(self.frame.interior, text="Save Settings", command= self.save)     
+        self.save.pack(anchor ='w', fill=X,side =RIGHT)
+        
+        
             
         
 class box(Frame):
@@ -338,12 +391,12 @@ class box(Frame):
         Frame.__init__(self)
         self.var = IntVar()
         self.directory=StringVar()
-        self.checkbox = Checkbutton(self, text=coursename[number],width= 40, variable= self.var)
-        self.checkbox.grid(row=number+1,sticky=W,pady=5)
-        self.browse = Button(self, text ="Browse", command= self.getdir)
-        self.browse.grid(row=number+1,column =5, sticky = E,pady=5)
-        self.label_dir = Label(self,textvariable=self.directory)
-        self.label_dir.grid(row=number+1 , column=6,pady=5)
+        self.checkbox = Checkbutton(master.interior, text=coursename[number],width= 40, variable= self.var)
+        self.checkbox.pack(anchor ='w', fill=X,side=BOTTOM)
+        self.browse = Button(master.interior, text ="Browse", command= self.getdir)
+        self.browse.pack(anchor ='w', fill=X,side=BOTTOM)
+        self.label_dir = Label(master.interior,textvariable=self.directory)
+        self.label_dir.pack(anchor ='w', fill=X,side=BOTTOM)
         
         if os.path.exists("Preferences.txt"): 
             file_pref=open("Preferences.txt",'r')
@@ -357,7 +410,7 @@ class box(Frame):
                 if(str(coursename[number]) in str(lines[4*number+1])):
                     self.directory.set((lines[4*number+3])[:lines[4*number+3].index("\n")])                    
                 else:
-                    print "here"
+                    
                     self.directory.set("C:/")
             
         else:
