@@ -74,7 +74,7 @@ class TraceConsole():       #Log Messages
     def __init__(self):
         # Init the main GUI window
         self._logFrame = Tkinter.Frame()
-        self._log      = Tkinter.Text(self._logFrame, wrap=Tkinter.NONE, setgrid=True, height =5, width= 70)
+        self._log      = Tkinter.Text(self._logFrame, wrap=Tkinter.NONE, setgrid=True, height =8, width= 90)
         self._scrollb  = Tkinter.Scrollbar(self._logFrame, orient=Tkinter.VERTICAL)
         self._scrollb.config(command = self._log.yview) 
         self._log.config(yscrollcommand = self._scrollb.set)
@@ -91,6 +91,7 @@ class TraceConsole():       #Log Messages
     def log(self, msg, level=None):
         # Write on GUI
         self._log.insert('end', msg + '\n')
+        self._log.see(Tkinter.END)
 
     def exitWindow(self):
         # Exit the GUI window and close log file
@@ -217,6 +218,7 @@ class Sync(Frame):
 
         for link in self.links:
             m.update()
+            
             br.open(link.url)
             if ((br.geturl()).endswith('.pdf') or (br.geturl()).endswith('forcedownload=1')):
                 
@@ -252,7 +254,10 @@ class Sync(Frame):
 
     def dld(self):
         global t
-        t.log("Downloading files, Please do not press any buttons until complete!")
+        t.log("Downloading files, Please do not close until complete!")
+        self.sync.config(state='disabled')
+        self.pref.config(state='disabled')
+        self.logout.config(state='disabled')
         start_time = time.time()
         urls =[]
         directories= []
@@ -271,8 +276,18 @@ class Sync(Frame):
             t.log("Moodle is up-to-date!")
             totaltime= time.time() - start_time
             t.log("Time Taken: " + str(int(totaltime/60)) +" minutes and " + str(int(totaltime%60)) + " seconds!")
+            self.sync.config(state='normal')
+            self.pref.config(state='normal')
+            self.logout.config(state='normal')
         else:
-            self.pref()
+            t.log("Please set Preferences first!")
+            self.sync.config(state='normal')
+            self.pref.config(state='normal')
+            self.logout.config(state='normal')
+            self.destroy()
+            self.newWindow = Home(self.master)
+
+        
                 
 
     def pref(self):
@@ -298,8 +313,8 @@ class Sync(Frame):
         self.sync.grid(row=1,pady=5)
         self.pref=Button(self, text="Preferences", command = self.pref)
         self.pref.grid(row=2,pady=5)
-        self.pref=Button(self, text="Logout", command = self.logout)
-        self.pref.grid(row=3,pady=5)
+        self.logout=Button(self, text="Logout", command = self.logout)
+        self.logout.grid(row=3,pady=5)
         self.label_2 = Label(self, text='Made By:', justify=RIGHT, anchor= 'e', width =80)
         self.label_2.grid(row=4,padx=[0,80])
         self.label_3 = Label(self, text='Nihal Singh' ,justify=RIGHT, anchor= 'e', width =80)
@@ -355,7 +370,7 @@ class Home(Frame):
         n= len(course)
         
         self.frame = VerticalScrolledFrame(m)
-        self.frame.pack()
+        self.frame.pack(fill=BOTH, expand=YES)
         self.Name = 'Welcome '+myname
         self.label_1 = Label(self.frame.interior, text=self.Name, justify=CENTER)
         self.label_1.grid(row=0,column=0,columnspan=3)
@@ -384,7 +399,7 @@ class box(Frame):
         Frame.__init__(self)
         self.var = IntVar()
         self.directory=StringVar()
-        self.checkbox = Checkbutton(master.interior, text=coursename[number],width= 40, variable= self.var)
+        self.checkbox = Checkbutton(master.interior, text=coursename[number],width= 60, variable= self.var)
         self.checkbox.grid(row=number+3,column=0)
         self.browse = Button(master.interior, text ="Browse", command= self.getdir)
         self.browse.grid(row=number+3,column=1)
