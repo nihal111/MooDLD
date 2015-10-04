@@ -1,49 +1,36 @@
-MooDLD - the Moodle Downloader
-
+MooDLD - the Ultimate Moodle Downloader 
+					-Version 1.0
+					-For Windows
 This application serves the purpose of automating the process of downloading files from Moodle. 
-It downloads all the '.pdf' files from the listed courses to preset directories on the user's computer.
-Designed for IIT Bombay Moodle. But may work for all Moodle's in general.
+It downloads all the ".pdf" files from the listed courses to preset directories on the user's computer.
+Designed for IIT Bombay Moodle. Made using Python. (Libraries: Tkinter, Mechanize)
+
+Instructions for use-
+
+1. Windows- Extract the MooDLD.rar file before use.
+   Linux- Download "MooDLD.py" and "moodle.ico" from Github Repo.
+Install python 2.7 and libraries: Tkinter and Mechanize.
+(Open terminal and type: "sudo apt-get install python2.7" to install Pthon 2.7, "sudo apt-get install python-mechanize" to install mechanize and "sudo apt-get install python-tk" to install Tkinter on Ubuntu and debian like Linuxes. 
+The python website describes a whole bunch of other ways to get Python.
+
+2. The user has to login using LDAP ID/Password. ("Keep me logged in" can be checked to avoid entering credentials repeatedly.)
+
+3. On the first run, after logging in, the user must go to the "Preferences" page to browse directories and check the courses to be downloaded. (Default directory is C:/).
+
+4. Press "Save Settings" to save the settings for further use. These can be changed by visiting the Preferences page any time. 
+
+5. The user has to click on the "DLD Files" button to download files of selected courses from Moodle.
 
 
- Requirements/Dependencies:
-- Python 2.7
-- Mechanize Library
+The application creates two ".txt" files in the directory in which it is kept - "Cred.txt" and "Preferences.txt" 
+These files are essential for the working of the application and must not be deleted! Deletion of above files will lead to loss in saved settings. 
+Also if a course has folders within it, MooDLD creates a new folder in the pre-set directory and downloads all the folder contents into this newly created folder, effectively, replicating the entire structure present on the website on your local system.
+Assignment handling has also been added so that the assignments which are uploaded are also downloaded as Moodle treats assignments differently.
 
- Installation Instructions For windows:
--Configure the "user info.txt" file to set your preferences and credentials i.e login username, password, links to courses subscribed (links where all pdf's are uploaded) and download directories
- The "user info.txt" file should be edited as such:
 
-"
-<username>
-<password>
-<no of subjects/courses>
-<subject 1 url to course website>
-<subject 2 url to course website>
-<subject 3 url to course website>
-<subject 4 url to course website>
-<subject 5 url to course website>
-<Download Directory for subject 1>
-<Download Directory for subject 2>
-<Download Directory for subject 3>
-<Download Directory for subject 4>
-<Download Directory for subject 5>
-"
+For any suggestions or feedback:
+nihal.111@gmail.com
 
-Here is an example
-"
-150040015
-mypassword
-5
-http://moodle.iitb.ac.in/mod/folder/view.php?id=9202
-http://moodle.iitb.ac.in/course/view.php?id=1879
-http://moodle.iitb.ac.in/course/view.php?id=1740
-http://moodle.iitb.ac.in/mod/folder/view.php?id=9066
-http://moodle.iitb.ac.in/course/view.php?id=1842
-D:\Moodle\BB101\
-D:\Moodle\PH107\
-D:\Moodle\PH107\
-D:\Moodle\CH105\
-D:\Moodle\MA105\
-"
-- Download directories must be created before running the code.
-- The subject url's should correspond to the website having list of all uploaded pdf's 
+Made By:
+Nihal Singh
+Arpan Banerjee
