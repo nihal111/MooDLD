@@ -1,21 +1,25 @@
 MooDLD - the Ultimate Moodle Downloader 
-					-Version 1.0
-					-For Windows
+					-Version 2.0
+
 This application serves the purpose of automating the process of downloading files from Moodle. 
 It downloads all the ".pdf" files from the listed courses to preset directories on the user's computer.
-Designed for IIT Bombay Moodle. Made using Python. (Libraries: Tkinter, Mechanize)
+Designed for IIT Bombay Moodle. Made using Python.
+
+Dependencies:
+
+1.Tkinter
+2.Mechanize
 
 Instructions for use-
 
-1. Windows- Extract the MooDLD.rar file before use.
-   Linux- Download "MooDLD.py" and "moodle.ico" from Github Repo.
-Install python 2.7 and libraries: Tkinter and Mechanize.
-(Open terminal and type: "sudo apt-get install python2.7" to install Pthon 2.7, "sudo apt-get install python-mechanize" to install mechanize and "sudo apt-get install python-tk" to install Tkinter on Ubuntu and debian like Linuxes. 
-The python website describes a whole bunch of other ways to get Python.
+1. Windows - Extract the MooDLD.rar file before use.
+   Linux and Mac- Download "MooDLD.py" and "moodle.ico" from Github Repo.
+
+	Install python 2.7, mechanize, tkinter
 
 2. The user has to login using LDAP ID/Password. ("Keep me logged in" can be checked to avoid entering credentials repeatedly.)
 
-3. On the first run, after logging in, the user must go to the "Preferences" page to browse directories and check the courses to be downloaded. (Default directory is C:/).
+3. On the first run, after logging in, the user must go to the "Preferences" page to browse directories and check the courses to be downloaded.
 
 4. Press "Save Settings" to save the settings for further use. These can be changed by visiting the Preferences page any time. 
 
@@ -30,6 +34,8 @@ Assignment handling has also been added so that the assignments which are upload
 
 For any suggestions or feedback:
 nihal.111@gmail.com
+akash.trehan123@gmail.com
+arpanbnrj9@gmail.com
 
 Made By:
 Nihal Singh
