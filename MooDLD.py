@@ -5,7 +5,7 @@ import time
 import tkFileDialog
 import os
 import logging
-import Tkinter as Tkinter
+import Tkinter
 
 moodle = 'http://moodle.iitb.ac.in/login/index.php'
 br = mechanize.Browser()
@@ -39,7 +39,14 @@ Initialises the screen elements and then checks for saved credentials
 
 
 class VerticalScrolledFrame(Frame):
+    '''
+    Creates and updates scroll bar in MooDLD window
+    '''
+
     def __init__(self, parent, *args, **kw):
+        '''
+        Constructor
+        '''
         Frame.__init__(self, parent, *args, **kw)
 
         # create a canvas object and a vertical scrollbar for scrolling it
