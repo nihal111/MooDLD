@@ -21,14 +21,22 @@ downloaded = []
 downloadlinks = []
 myname = ""
 
+'''
+Flow Of Control:
+1. m=Tkinter.Tk()
+Creates a tkinter GUI frame
+
+2. t=TraceConsole()
+Creates the trace Console for logging
+
+3.LoginFrame(m)
+Passes the tkinter frame to LoginFrame class
+i.e Login screen opens invariably the first time.
+Initialises the screen elements and then checks for saved credentials
+'''
+
 
 class VerticalScrolledFrame(Frame):
-    """A pure Tkinter scrollable frame that actually works!
-    * Use the 'interior' attribute to place widgets inside the scrollable frame
-    * Construct and pack/place/grid normally
-    * This frame only allows vertical scrolling
-
-    """
     def __init__(self, parent, *args, **kw):
         Frame.__init__(self, parent, *args, **kw)            
 
@@ -92,8 +100,6 @@ class TraceConsole():       #Log Messages
         # Exit the GUI window and close log file
         print('exit..')
         
-m = Tkinter.Tk()
-t = TraceConsole()
 
 class savedata():                                     
     def __init__(self, chkbox, url, directory, name):
@@ -105,22 +111,24 @@ class savedata():
 class LoginFrame(Frame):
     def __init__(self, master):
         Frame.__init__(self)
-        self.label_1 = Label(self, text = "Username")
-        self.label_2 = Label(self, text = "Password")
+        self.username_label = Label(self, text = "Username")
+        self.password_label = Label(self, text = "Password")
         self.x = IntVar()
-        self.entry_1 = Entry(self)
-        self.entry_2 = Entry(self, show = "*")
-        self.var = IntVar()
-        self.label_1.grid(row = 0, sticky = W)
-        self.label_2.grid(row = 1, sticky = W)
-        self.entry_1.grid(row = 0, column = 1)
-        self.entry_2.grid(row = 1, column = 1)
+        self.username = Entry(self)
+        self.password = Entry(self, show = "*")
+        self.keep_me_logged_in = IntVar()
+        self.username_label.grid(row = 0, sticky = W)
+        self.password_label.grid(row = 1, sticky = W)
+        self.username.grid(row = 0, column = 1)
+        self.password.grid(row = 1, column = 1)
         
-        self.checkbox = Checkbutton(self, text = "Keep me logged in", variable = self.var)
+        #Keep me logged in state saved in var
+        self.checkbox = Checkbutton(self, text = "Keep me logged in", variable = self.keep_me_logged_in)
         self.checkbox.grid(columnspan = 2)
         
-        self.logbtn = Button(self, text = "Login", command = self._login_btn_clicked)
-        self.logbtn.grid(columnspan = 2)
+        #login button, onClick = _login_btn_clicked
+        self.loginbtn = Button(self, text = "Login", command = self._login_btn_clicked)
+        self.loginbtn.grid(columnspan = 2)
 
         self.pack()
         
@@ -128,62 +136,63 @@ class LoginFrame(Frame):
         global t
         br = mechanize.Browser()
         t.log("Opening Moodle...")
+
+        self.check_connection()
+        
+        #If Cred.txt exists check for saved credentials
+        if os.path.exists("Cred.txt"):
+            with open("Cred.txt", "r") as Cred:
+                cred = Cred.readlines()
+                
+                #if credentials are found, login. else do nothing
+                if (int(cred[0][0]) == 1):
+                    self.login(str (cred[1][:cred[1].index("\n")]), str(cred[2][:cred[2].index("\n")]))
+                    br.open(moodle)
+                    
+    
+    #On login button click
+    def _login_btn_clicked(self):
+        t.log("Attempting login...")
+        
+        with open("Cred.txt", "w") as text_file:
+
+            #var contains boolean for keep me logged in, entry_1 and entry_2 are username passwords
+            if (self.keep_me_logged_in.get()):
+                text_file.write(str(self.keep_me_logged_in.get()) + '\n')
+                text_file.write(self.username.get() + '\n')
+                text_file.write(self.password.get() + '\n')
+            else:                       
+                text_file.write(str(self.keep_me_logged_in.get()) + '\n')
+            text_file.close()        
+            
+            self.login(self.username.get(), self.password.get())  
+
+
+    def login(self, username, password):
+        br.select_form(nr = 0)
+        br['username'] = username
+        br['password'] = password
+        br.submit()
+        if ((br.geturl()) == "http://moodle.iitb.ac.in/"):
+            for link in br.links(url_regex = 'http://moodle.iitb.ac.in/user/profile.php'):
+                self.profile = link.url
+            br.open (self.profile)
+            global myname
+            myname = br.title()[:(br.title()).index(":")]
+            tm.showinfo("Login info", "Welcome " + myname + "!" )
+            self.new_window()
+            t.log("Successful Login as " + myname)
+        else:
+            tm.showerror("Login error", "Incorrect username or password")
+
+    def check_connection(self):
+        #Check for connection issues
         try:
             br.open('http://moodle.iitb.ac.in/login/index.php')
         except:
             tm.showerror("Connection Problem!", "Cannot Connect to Moodle. Please Restart!")
             t.log("Could not connect to moodle, Please restart application to try again!")
             m.update()
-        
-        if os.path.exists("Cred.txt"):
-            with open("Cred.txt", "r") as Cred:
-                cred = Cred.readlines()
-                
-                if (int(cred[0][0]) == 1):
-                    br.open(moodle)
-                    br.select_form(nr = 0)
-                    br['username'] = str(cred[1][:cred[1].index("\n")])
-                    br['password'] = str(cred[2][:cred[2].index("\n")])
-                    br.submit()
-                    if ((br.geturl()) == "http://moodle.iitb.ac.in/"):
-                        for link in br.links(url_regex = 'http://moodle.iitb.ac.in/user/profile.php'):
-                            self.profile = link.url
-                        br.open (self.profile)
-                        global myname
-                        myname = br.title()[:(br.title()).index(":")]
-                        tm.showinfo("Login info", "Welcome " + myname + "!" )
-                        self.new_window()
-                        t.log("Successful Login as " + myname)
-                    else:
-                        tm.showerror("Login error", "Incorrect username or password")
-                                 
-    def _login_btn_clicked(self):
-        t.log("Attempting login...")
-        
-        with open("Cred.txt", "w") as text_file:
-            if (self.var.get()):
-                text_file.write(str(self.var.get()) + '\n')
-                text_file.write(self.entry_1.get() + '\n')
-                text_file.write(self.entry_2.get() + '\n')
-            else:                       
-                text_file.write(str(self.var.get()) + '\n')
-            text_file.close()        
-            br.select_form(nr = 0)
-            br['username'] = self.entry_1.get()
-            br['password'] = self.entry_2.get()
-            br.submit()
-
-            if ((br.geturl()) == "http://moodle.iitb.ac.in/"):
-                for link in br.links(url_regex='http://moodle.iitb.ac.in/user/profile.php'):
-                    self.profile = link.url
-                br.open(self.profile)
-                global myname
-                myname = br.title()[:(br.title()).index(":")]
-                tm.showinfo("Login info", "Welcome " + myname + "!" )
-                self.new_window()
-                t.log("Login Successful!")
-            else:
-                tm.showerror("Login error", "Incorrect username or password")    
             
     def new_window(self):
         self.destroy()
@@ -412,7 +421,10 @@ class box(Frame):
         self.label_dir = Label(master.interior,textvariable = self.directory)
         self.label_dir.grid(row = number + 3,column = 2)
         
-        
+
+
+m = Tkinter.Tk()
+t = TraceConsole()
 m.wm_title("MooDLD")
 try:
     m.iconbitmap('moodle.ico')
