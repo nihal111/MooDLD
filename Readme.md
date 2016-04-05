@@ -2,7 +2,11 @@
 
 ##### Release 2.0
 
+<<<<<<< HEAD
 ** <center> Designed for IIT Bombay Moodle </center> **
+=======
+**Designed for IIT Bombay Moodle**
+>>>>>>> 699ecae9efe268314075aad4419083e8d307ef52
 
 This application serves the purpose of automating the process of downloading files from Moodle.
 It downloads all the files from the listed courses to the user's computer.
@@ -18,11 +22,19 @@ It downloads all the files from the listed courses to the user's computer.
 Windows - Extract the MooDLD.rar file before use.
 
 2. Install Dependencies
+<<<<<<< HEAD
   - **mechanize**  <br/>On Ubuntu use `sudo apt-get istall python-mechanize`<br/>
   On Mac use `sudo pip install mechanize`
 
   - **Tkinter** <br/>
   On Ubuntu use `sudo apt-get install python-tk`
+=======
+  - **mechanize**  <br/>On Ubuntu use `sudo apt-get istall python-mechanize` <br/>
+  On Mac use `sudo pip install mechanize`
+
+  - **Tkinter** <br/>
+  On Ubuntu use `sudo apt-get install python-tk`<br/>
+>>>>>>> 699ecae9efe268314075aad4419083e8d307ef52
   On Mac `Tkinter` is installed by default when you install python
 
 3. Run using `python MooDLD.py`
