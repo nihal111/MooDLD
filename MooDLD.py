@@ -5,6 +5,7 @@ import time
 import tkFileDialog
 import os
 import logging
+import Tkinter
 
 moodle = 'http://moodle.iitb.ac.in/login/index.php'
 br = mechanize.Browser()
