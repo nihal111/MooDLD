@@ -38,7 +38,7 @@ Initialises the screen elements and then checks for saved credentials
 
 class VerticalScrolledFrame(Frame):
     def __init__(self, parent, *args, **kw):
-        Frame.__init__(self, parent, *args, **kw)            
+        Frame.__init__(self, parent, *args, **kw)
 
         # create a canvas object and a vertical scrollbar for scrolling it
         vscrollbar = Scrollbar(self, orient = VERTICAL)
@@ -80,10 +80,10 @@ class TraceConsole():       #Log Messages
         self._logFrame = Tkinter.Frame()
         self._log = Tkinter.Text(self._logFrame, wrap = Tkinter.NONE, setgrid = True, height = 8, width = 90)
         self._scrollb  = Tkinter.Scrollbar(self._logFrame, orient = Tkinter.VERTICAL)
-        self._scrollb.config(command = self._log.yview) 
+        self._scrollb.config(command = self._log.yview)
         self._log.config(yscrollcommand = self._scrollb.set)
         self._scrolla = Tkinter.Scrollbar(self._logFrame, orient=Tkinter.HORIZONTAL)
-        self._scrolla.config(command = self._log.xview) 
+        self._scrolla.config(command = self._log.xview)
         self._log.config(xscrollcommand = self._scrolla.set)
         # Grid & Pack
         self._log.grid(column = 0, row = 0)
@@ -96,18 +96,14 @@ class TraceConsole():       #Log Messages
         self._log.insert('end', msg + '\n')
         self._log.see(Tkinter.END)
 
-    def exitWindow(self):
-        # Exit the GUI window and close log file
-        print('exit..')
-        
 
-class savedata():                                     
+class savedata():
     def __init__(self, chkbox, url, directory, name):
         self.chkbox = chkbox
         self.url = url
         self.directory = directory
         self.name = name
-        
+
 class LoginFrame(Frame):
     def __init__(self, master):
         Frame.__init__(self)
@@ -121,52 +117,50 @@ class LoginFrame(Frame):
         self.password_label.grid(row = 1, sticky = W)
         self.username.grid(row = 0, column = 1)
         self.password.grid(row = 1, column = 1)
-        
+
         #Keep me logged in state saved in var
         self.checkbox = Checkbutton(self, text = "Keep me logged in", variable = self.keep_me_logged_in)
         self.checkbox.grid(columnspan = 2)
-        
+
         #login button, onClick = _login_btn_clicked
         self.loginbtn = Button(self, text = "Login", command = self._login_btn_clicked)
         self.loginbtn.grid(columnspan = 2)
 
         self.pack()
-        
+
         global br
         global t
         br = mechanize.Browser()
         t.log("Opening Moodle...")
 
-        self.check_connection()
-        
         #If Cred.txt exists check for saved credentials
-        if os.path.exists("Cred.txt"):
+        if self.check_connection() and os.path.exists("Cred.txt"):
             with open("Cred.txt", "r") as Cred:
                 cred = Cred.readlines()
-                
+
                 #if credentials are found, login. else do nothing
                 if (int(cred[0][0]) == 1):
                     self.login(str (cred[1][:cred[1].index("\n")]), str(cred[2][:cred[2].index("\n")]))
                     br.open(moodle)
-                    
-    
+
+
     #On login button click
     def _login_btn_clicked(self):
         t.log("Attempting login...")
-        
-        with open("Cred.txt", "w") as text_file:
+        if self.check_connection():
 
-            #var contains boolean for keep me logged in, entry_1 and entry_2 are username passwords
-            if (self.keep_me_logged_in.get()):
-                text_file.write(str(self.keep_me_logged_in.get()) + '\n')
-                text_file.write(self.username.get() + '\n')
-                text_file.write(self.password.get() + '\n')
-            else:                       
-                text_file.write(str(self.keep_me_logged_in.get()) + '\n')
-            text_file.close()        
-            
-            self.login(self.username.get(), self.password.get())  
+            with open("Cred.txt", "w") as text_file:
 
+                #var contains boolean for keep me logged in, entry_1 and entry_2 are username passwords
+                if (self.keep_me_logged_in.get()):
+                    text_file.write(str(self.keep_me_logged_in.get()) + '\n')
+                    text_file.write(self.username.get() + '\n')
+                    text_file.write(self.password.get() + '\n')
+                else:
+                    text_file.write(str(self.keep_me_logged_in.get()) + '\n')
+                text_file.close()
+
+                self.login(self.username.get(), self.password.get())
 
     def login(self, username, password):
         br.select_form(nr = 0)
@@ -179,28 +173,28 @@ class LoginFrame(Frame):
             br.open (self.profile)
             global myname
             myname = br.title()[:(br.title()).index(":")]
-            tm.showinfo("Login info", "Welcome " + myname + "!" )
             self.new_window()
             t.log("Successful Login as " + myname)
         else:
-            tm.showerror("Login error", "Incorrect username or password")
+            t.log("Incorrect username or password")
 
     def check_connection(self):
         #Check for connection issues
         try:
             br.open('http://moodle.iitb.ac.in/login/index.php')
+            return 1
         except:
-            tm.showerror("Connection Problem!", "Cannot Connect to Moodle. Please Restart!")
-            t.log("Could not connect to moodle, Please restart application to try again!")
+            t.log("Could not connect to moodle, Please check your connection and try again!")
             m.update()
-            
+            return 0
+
     def new_window(self):
         self.destroy()
         self.newWindow = Sync(self.master)
 
 
 class Sync(Frame):
-    
+
     def retrieve(self, url, directory):
         m.update()
         global t
@@ -209,29 +203,29 @@ class Sync(Frame):
         self.links = []
         br.open(url)
         for link in br.links(url_regex = "."):
-            if ((not (link.url.startswith('http://moodle.iitb.ac.in/login/logout.php'))) and 
-                (not link.url.startswith(br.geturl())) and 
-                (not link.url.startswith('#')) and 
-                (not link.url.startswith('http://moodle.iitb.ac.in/mod/forum')) and 
-                (not link.url.startswith('http://moodle.iitb.ac.in/my')) and 
-                (not link.url.startswith('http://moodle.iitb.ac.in/user')) and 
-                (not link.url.startswith('http://moodle.iitb.ac.in/badges')) and 
-                (not link.url.startswith('http://moodle.iitb.ac.in/calendar')) and 
-                (not link.url.startswith('http://moodle.iitb.ac.in/grade')) and 
-                (not link.url.startswith('http://moodle.iitb.ac.in/message'))and 
+            if ((not (link.url.startswith('http://moodle.iitb.ac.in/login/logout.php'))) and
+                (not link.url.startswith(br.geturl())) and
+                (not link.url.startswith('#')) and
+                (not link.url.startswith('http://moodle.iitb.ac.in/mod/forum')) and
+                (not link.url.startswith('http://moodle.iitb.ac.in/my')) and
+                (not link.url.startswith('http://moodle.iitb.ac.in/user')) and
+                (not link.url.startswith('http://moodle.iitb.ac.in/badges')) and
+                (not link.url.startswith('http://moodle.iitb.ac.in/calendar')) and
+                (not link.url.startswith('http://moodle.iitb.ac.in/grade')) and
+                (not link.url.startswith('http://moodle.iitb.ac.in/message'))and
                 (link.url not in downloaded)):
 
                 self.links.append(link)
 
         for link in self.links:
             m.update()
-            
+
             br.open(link.url)
             if ((br.geturl()).endswith('.pdf') or (br.geturl()).endswith('forcedownload=1')):
-                
+
                 if (']' in link.text):
                     if not os.path.exists(directory+link.text[(link.text).index("]")+1:]+'.pdf'):
-                      if not (link.url in downloadlinks):  
+                      if not (link.url in downloadlinks):
                         t.log("Downloading " + link.text[(link.text).index("]")+1:]+'.pdf' + " to " + directory)
                         br.retrieve(link.url,directory+link.text[(link.text).index("]")+1:]+'.pdf')
                         downloadlinks.append(link.url)
@@ -240,7 +234,7 @@ class Sync(Frame):
                       if not (link.url in downloadlinks):
                         t.log("Downloading " + link.text+'.pdf' + " to " + directory)
                         br.retrieve(link.url,directory+link.text+'.pdf')
-                        downloadlinks.append(link.url)             
+                        downloadlinks.append(link.url)
             else:
                 if ((br.geturl()).startswith('http://moodle.iitb.ac.in/mod/folder') and (link.url not in downloaded) and (link.text).startswith('[IMG]')):
                     foldername = br.title()[(br.title()).index(":")+2:]
@@ -252,9 +246,9 @@ class Sync(Frame):
                 if ((br.geturl()).startswith('http://moodle.iitb.ac.in/mod/assign') and (link.url not in downloaded)):
                     downloaded.append(link.url)
                     self.retrieve(link.url, directory)
-       
+
             br.back()
-            self.pack()           
+            self.pack()
 
     def dld(self):
         global t
@@ -302,7 +296,7 @@ class Sync(Frame):
         br.close()
         self.destroy()
         self.newWindow = LoginFrame(self.master)
-    
+
     def __init__(self,master):
         Frame.__init__(self)
         self.pack()
@@ -315,13 +309,7 @@ class Sync(Frame):
         self.pref.grid(row = 2,pady = 5)
         self.logout=Button(self, text = "Logout", command = self.logout)
         self.logout.grid(row = 3,pady = 5)
-        self.label_2 = Label(self, text = 'Made By:', justify = RIGHT, anchor ='e', width = 80)
-        self.label_2.grid(row = 4,padx=[0, 80])
-        self.label_3 = Label(self, text = 'Nihal Singh' ,justify = RIGHT, anchor = 'e', width = 80)
-        self.label_3.grid(row = 5,padx=[40, 0])
-        self.label_3 = Label(self, text = 'Arpan Banerjee', justify = RIGHT, anchor ='e', width = 80)
-        self.label_3.grid(row = 6,padx=[50, 0])
-        
+
 
 class Home(Frame):
 
@@ -329,12 +317,12 @@ class Home(Frame):
         n = len(course)
         for i in range(0, n):
             courses[i].checkbox.select()
-            
+
     def dall(self):
         n = len(course)
         for i in range(0, n):
             courses[i].checkbox.deselect()
-           
+
     def save(self):
         n = len(courses)
         open("Preferences.txt", "w").close()
@@ -350,12 +338,12 @@ class Home(Frame):
             preferences.write(save[i].directory + '\n')
             courses[i].pack_forget()
         preferences.close()
-        self.frame.destroy()        
+        self.frame.destroy()
         self.newWindow = Sync(m)
 
     def __init__(self, master):
         #Frame.__init__(self)
-        global myname        
+        global myname
         del courses[:]
         del course[:]
         del coursename[:]
@@ -367,31 +355,31 @@ class Home(Frame):
         global TotalInMoodle
         TotalInMoodle = len(course)
         n = len(course)
-        
+
         self.frame = VerticalScrolledFrame(m)
         self.frame.pack(fill = BOTH, expand = YES)
         self.Name = 'Welcome ' + myname
         self.label_1 = Label(self.frame.interior, text = self.Name, justify = CENTER)
         self.label_1.grid(row = 0,column = 0,columnspan = 3)
-        
+
         for i in range(0, n):
             courses.append(box(self.frame, i))
-            
-        self.selectall = Button(self.frame.interior, text = "Select All", command = self.sall)     
+
+        self.selectall = Button(self.frame.interior, text = "Select All", command = self.sall)
         self.selectall.grid(row = 1, column = 0)
-        self.deselectall = Button(self.frame.interior, text = "Deselect All", command = self.dall)     
+        self.deselectall = Button(self.frame.interior, text = "Deselect All", command = self.dall)
         self.deselectall.grid(row = 1, column = 1, padx = [0, 100])
-        self.save = Button(self.frame.interior, text = "Save Settings", command = self.save)     
+        self.save = Button(self.frame.interior, text = "Save Settings", command = self.save)
         self.save.grid(row = 1, column = 2)
-        
-        
+
+
 class box(Frame):
-    
+
     def getdir(self):
         directory = tkFileDialog.askdirectory(parent = m, initialdir = "C:/", title = 'Please select a directory')
         if len(directory) > 0:
             self.directory.set(directory)
-        
+
     def __init__(self, master, number):
         Frame.__init__(self)
         self.var = IntVar()
@@ -400,8 +388,8 @@ class box(Frame):
         self.checkbox.grid(row = number + 3,column = 0)
         self.browse = Button(master.interior, text = "Browse", command = self.getdir)
         self.browse.grid(row = number + 3,column = 1)
-        
-        if os.path.exists("Preferences.txt"): 
+
+        if os.path.exists("Preferences.txt"):
             file_pref=open("Preferences.txt",'r')
             lines = file_pref.readlines()
             global TotalInPreferences
@@ -411,16 +399,16 @@ class box(Frame):
                 if ((lines[4 * number])[:lines[4 * number].index("\n")] == '1'):
                         self.checkbox.select()
                 if(str(coursename[number]) in str(lines[4 * number + 1])):
-                    self.directory.set((lines[4 * number + 3])[:lines[4 * number + 3].index("\n")])                    
+                    self.directory.set((lines[4 * number + 3])[:lines[4 * number + 3].index("\n")])
                 else:
-                    
-                    self.directory.set("C:/")  
+
+                    self.directory.set("C:/")
         else:
             self.directory.set("C:/")
 
         self.label_dir = Label(master.interior,textvariable = self.directory)
         self.label_dir.grid(row = number + 3,column = 2)
-        
+
 
 
 m = Tkinter.Tk()
