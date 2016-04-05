@@ -2,7 +2,7 @@
 
 ##### Release 2.0
 
-** <center> Designed for IIT Bombay Moodle </center> **
+<p align="center"><b>Designed for IIT Bombay Moodle</b></p>
 
 This application serves the purpose of automating the process of downloading files from Moodle.
 It downloads all the files from the listed courses to the user's computer.
