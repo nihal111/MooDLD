@@ -37,10 +37,9 @@ i.e Login screen opens invariably the first time.
 Initialises the screen elements and then checks for saved credentials
 '''
 
-
 class VerticalScrolledFrame(Frame):
     '''
-    Creates and updates scroll bar in MooDLD window
+    Creates Scrollable frame for Preferences page
     '''
 
     def __init__(self, parent, *args, **kw):
