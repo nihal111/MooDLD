@@ -34,10 +34,10 @@ Assignment handling has also been added so that the assignments which are upload
 
 For any suggestions or feedback:
 nihal.111@gmail.com
-akash.trehan123@gmail.com
 arpanbnrj9@gmail.com
+akash.trehan123@gmail.com
 
 Made By:
 Nihal Singh
-Akash Trehan
 Arpan Banerjee
+Akash Trehan
