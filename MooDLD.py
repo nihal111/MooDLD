@@ -22,6 +22,8 @@ downloadlinks = []
 myname = ""
 
 '''
+TTDs:
+
 Flow Of Control:
 1. m=Tkinter.Tk()
 Creates a tkinter GUI frame
@@ -43,9 +45,14 @@ class VerticalScrolledFrame(Frame):
         # create a canvas object and a vertical scrollbar for scrolling it
         vscrollbar = Scrollbar(self, orient = VERTICAL)
         vscrollbar.pack(fill = Y, side = RIGHT, expand = FALSE)
-        canvas = Canvas(self, bd = 0, highlightthickness = 0, yscrollcommand = vscrollbar.set)
+        
+        hscrollbar = Scrollbar(self, orient = HORIZONTAL)
+        hscrollbar.pack(fill = X, side = BOTTOM, expand = FALSE)
+        
+        canvas = Canvas(self, bd = 0, highlightthickness = 0, yscrollcommand = vscrollbar.set, xscrollcommand = hscrollbar.set)
         canvas.pack(side = LEFT, fill = BOTH, expand = TRUE)
         vscrollbar.config(command = canvas.yview)
+        hscrollbar.config(command = canvas.xview)
 
         # reset the view
         canvas.xview_moveto(0)
@@ -53,7 +60,7 @@ class VerticalScrolledFrame(Frame):
 
         # create a frame inside the canvas which will be scrolled with it
         self.interior = interior = Frame(canvas)
-        interior_id = canvas.create_window(0, 0, window=interior, anchor=NW)
+        interior_id = canvas.create_window(0, 0, window=interior, anchor=N+W)
 
         # track changes to the canvas and frame width and sync them,
         # also updating the scrollbar
@@ -64,13 +71,16 @@ class VerticalScrolledFrame(Frame):
             if interior.winfo_reqwidth() != canvas.winfo_width():
                 # update the canvas's width to fit the inner frame
                 canvas.config(width = interior.winfo_reqwidth())
+
         interior.bind('<Configure>', _configure_interior)
 
+        #_configure_canvas is used to resize the window size to fit content. Can be used when changing window.
         def _configure_canvas(event):
             if interior.winfo_reqwidth() != canvas.winfo_width():
                 # update the inner frame's width to fill the canvas
                 canvas.itemconfigure(interior_id, width = canvas.winfo_width())
-        canvas.bind('<Configure>', _configure_canvas)
+        #calls the function _configure_canvas
+        #canvas.bind('<Configure>', _configure_canvas)
 
 
 class TraceConsole():       #Log Messages
@@ -192,8 +202,20 @@ class LoginFrame(Frame):
         self.destroy()
         self.newWindow = Sync(self.master)
 
-
 class Sync(Frame):
+
+    def __init__(self,master):
+        Frame.__init__(self)
+        self.pack()
+        self.Name = 'Welcome ' + str(myname)
+        self.label_1 = Label(self, text = self.Name, justify = LEFT)
+        self.label_1.grid(row = 0,pady = 5)
+        self.sync= Button(self, text = "DLD Files",command = self.dld)
+        self.sync.grid(row = 1,pady = 5)
+        self.pref=Button(self, text = "Preferences", command = self.pref)
+        self.pref.grid(row = 2,pady = 5)
+        self.logout=Button(self, text = "Logout", command = self.logout)
+        self.logout.grid(row = 3,pady = 5)
 
     def retrieve(self, url, directory):
         m.update()
@@ -297,18 +319,7 @@ class Sync(Frame):
         self.destroy()
         self.newWindow = LoginFrame(self.master)
 
-    def __init__(self,master):
-        Frame.__init__(self)
-        self.pack()
-        self.Name = 'Welcome ' + str(myname)
-        self.label_1 = Label(self, text = self.Name, justify = LEFT)
-        self.label_1.grid(row = 0,pady = 5)
-        self.sync= Button(self, text = "DLD Files",command = self.dld)
-        self.sync.grid(row = 1,pady = 5)
-        self.pref=Button(self, text = "Preferences", command = self.pref)
-        self.pref.grid(row = 2,pady = 5)
-        self.logout=Button(self, text = "Logout", command = self.logout)
-        self.logout.grid(row = 3,pady = 5)
+    
 
 
 class Home(Frame):
@@ -418,5 +429,5 @@ try:
     m.iconbitmap('moodle.ico')
 except:
     tm.showerror("Icon Not Found", "Download moodle.ico to same directory!")
-LoginFrame(m)
+l = LoginFrame(m)
 m.mainloop()
