@@ -51,9 +51,9 @@ Akash Trehan - [CodeMaxx](https://github.com/CodeMaxx)
 
 Please feel free to contact us:
 
-[nihal.111@gmail.com](nihal.111@gmail.com)<br/>
-[arpanbnrj9@gmail.com](arpanbnrj9@gmail.com)<br/>
-[akash.trehan123@gmail.com](akash.trehan123@gmail.com)<br/>
+<mailto:nihal.111@gmail.com><br/>
+<mailto:arpanbnrj9@gmail.com><br/>
+<mailto:akash.trehan123@gmail.com><br/>
 
 **Any bugs found should be reported to the issue tracker.**<br/><br/>
 **You can send in Pull Requests to contribute to the project.**
