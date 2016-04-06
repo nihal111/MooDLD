@@ -202,8 +202,12 @@ class LoginFrame(Frame):
                     text_file.write(str(self.keep_me_logged_in.get()) + '\n')
                     text_file.write(self.username.get() + '\n')
                     text_file.write(self.password.get() + '\n')
+                    text_file.write('C:/')
                 else:
                     text_file.write(str(self.keep_me_logged_in.get()) + '\n')
+                    text_file.write('\n')
+                    text_file.write('\n')
+                    text_file.write('C:/')
                 text_file.close()
 
                 self.login(self.username.get(), self.password.get())
@@ -299,6 +303,8 @@ class Sync(Frame):
                             t.log('Downloading '
                                   + link.text[link.text.index(']')
                                   + 1:] + '.pdf' + ' to ' + directory)
+                            if not os.path.isdir(directory):
+                                os.makedirs(directory)
                             br.retrieve(link.url, directory
                                     + link.text[link.text.index(']')
                                     + 1:] + '.pdf')
@@ -309,6 +315,8 @@ class Sync(Frame):
                         if not link.url in downloadlinks:
                             t.log('Downloading ' + link.text + '.pdf'
                                   + ' to ' + directory)
+                            if not os.path.isdir(directory):
+                                os.makedirs(directory)
                             br.retrieve(link.url, directory + link.text
                                     + '.pdf')
                             downloadlinks.append(link.url)
@@ -414,6 +422,14 @@ class Home(Frame):
         self.frame.destroy()
         self.newWindow = Sync(m)
 
+        creds = open('Cred.txt', 'r')
+        lines = creds.readlines()
+        creds.close()
+        creds = open('Cred.txt', 'w')
+        lines[3] = self.root_dir_box.directory.get() + '\n'
+        creds.writelines(lines)
+        creds.close()
+
     def __init__(self, master):
 
         # Frame.__init__(self)
@@ -435,11 +451,13 @@ class Home(Frame):
 
         self.frame = VerticalScrolledFrame(m)
         self.frame.pack(fill=BOTH, expand=YES)
+        '''
         self.Name = 'Welcome ' + myname
         self.label_1 = Label(self.frame.interior, text=self.Name,
                              justify=CENTER)
         self.label_1.grid(row=0, column=0, columnspan=3)
-
+        '''
+        self.root_dir_box = box(self.frame)
         for i in range(0, n):
             courses.append(box(self.frame, i))
 
@@ -463,38 +481,72 @@ class box(Frame):
         if len(directory) > 0:
             self.directory.set(directory)
 
-    def __init__(self, master, number):
-        Frame.__init__(self)
-        self.var = IntVar()
-        self.directory = StringVar()
-        self.checkbox = Checkbutton(master.interior,
-                                    text=coursename[number], width=60,
-                                    variable=self.var)
-        self.checkbox.grid(row=number + 3, column=0)
-        self.browse = Button(master.interior, text='Browse',
-                             command=self.getdir)
-        self.browse.grid(row=number + 3, column=1)
-
-        if os.path.exists('Preferences.txt'):
-            file_pref = open('Preferences.txt', 'r')
-            lines = file_pref.readlines()
-            global TotalInPreferences
-            global TotalInMoodle
-            TotalInPreferences = len(lines) / 4
-            if TotalInMoodle == TotalInPreferences:
-                if (lines[4 * number])[:lines[4 * number].index('\n')] == '1':
-                    self.checkbox.select()
-                if str(coursename[number]) in str(lines[4 * number + 1]):
-                    self.directory.set((lines[4 * number + 3])[:lines[4 * number + 3].index('\n')])
-                else:
-
-                    self.directory.set('C:/')
+    def rootgetdir(self):
+        directory = tkFileDialog.askdirectory(parent=m, initialdir='C:/'
+                , title='Please select a directory')
+        if len(directory) > 0:
+            self.directory.set(directory)
+            for i in range(len(courses)):
+                courses[i].directory.set(os.path.join(directory, coursename[i][:6]))
         else:
             self.directory.set('C:/')
 
-        self.label_dir = Label(master.interior,
-                               textvariable=self.directory)
-        self.label_dir.grid(row=number + 3, column=2)
+    def __init__(self, master, number=None):
+        Frame.__init__(self)
+        self.var = IntVar()
+        if number is not None:
+            self.directory = StringVar()
+            self.checkbox = Checkbutton(master.interior,
+                                        text=coursename[number], width=60,
+                                        variable=self.var)
+            self.checkbox.grid(row=number + 3, column=0)
+            self.browse = Button(master.interior, text='Browse',
+                                 command=self.getdir)
+            self.browse.grid(row=number + 3, column=1)
+
+            if os.path.exists('Preferences.txt'):
+                file_pref = open('Preferences.txt', 'r')
+                lines = file_pref.readlines()
+                global TotalInPreferences
+                global TotalInMoodle
+                TotalInPreferences = len(lines) / 4
+                if TotalInMoodle == TotalInPreferences:
+                    if (lines[4 * number])[:lines[4 * number].index('\n')] == '1':
+                        self.checkbox.select()
+                    if str(coursename[number]) in str(lines[4 * number + 1]):
+                        self.directory.set((lines[4 * number + 3])[:lines[4 * number + 3].index('\n')])
+                    else:
+
+                        self.directory.set('C:/')
+            else:
+                self.directory.set('C:/')
+
+            self.label_dir = Label(master.interior,
+                                   textvariable=self.directory)
+            self.label_dir.grid(row=number + 3, column=2)
+
+        else:
+            self.directory = StringVar()
+            self.checkbox = Checkbutton(master.interior,
+                            text='Root Directory', width=60,
+                            variable=self.var)
+            self.checkbox.grid(row=0, column=0)
+            self.browse = Button(master.interior, text='Browse',
+                                 command=self.rootgetdir)
+            self.browse.grid(row=0, column=1)
+
+            if os.path.exists('Cred.txt'):
+                file_pref = open('Cred.txt', 'r')
+                lines = file_pref.readlines()
+                if len(lines) > 3:
+                    self.directory.set(lines[3].replace('\n',''))
+                else:
+                    self.directory.set('C:/')
+            else:
+                self.directory.set('C:/')
+
+            self.label_dir = Label(master.interior, textvariable=self.directory)
+            self.label_dir.grid(row=0, column=2)
 
 
 m = Tkinter.Tk()
@@ -503,7 +555,6 @@ m.wm_title('MooDLD')
 try:
     m.iconbitmap('moodle.ico')
 except:
-    tm.showerror("Icon Not Found", "Download moodle.ico to same directory!")
+    t.log("Icon Not Found"+"Download moodle.ico to same directory!")
 l = LoginFrame(m)
 m.mainloop()
-
