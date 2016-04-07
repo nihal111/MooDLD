@@ -458,14 +458,18 @@ class Home(Frame):
 
         self.selectall = Button(self.frame.interior, text='Select All',
                                 command=self.sall)
-        self.selectall.grid(row=0, column=0)
+        self.selectall.grid(row=0, column=0, pady=10)
         self.deselectall = Button(self.frame.interior,
                                   text='Deselect All',
                                   command=self.dall)
-        self.deselectall.grid(row=0, column=1, padx=[0, 100])
+        self.deselectall.grid(row=0, column=1, padx=[0, 100], pady=10)
         self.save = Button(self.frame.interior, text='Save Settings',
                            command=self.save)
-        self.save.grid(row=0, column=2)
+        self.save.grid(row=0, column=2, pady=10)
+
+        self.f = Frame(self.frame.interior, height=20)
+        self.f.grid(row=2, columnspan=3, sticky="we")
+        
 
 
 class box(Frame):
