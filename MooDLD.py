@@ -3,7 +3,6 @@
 from Tkinter import *
 import tkMessageBox as tm
 import mechanize
-import time
 import tkFileDialog
 import os
 import logging
@@ -56,10 +55,10 @@ class VerticalScrolledFrame(Frame):
         # create a canvas object and a vertical scrollbar for scrolling it
         vscrollbar = Scrollbar(self, orient = VERTICAL)
         vscrollbar.pack(fill = Y, side = RIGHT, expand = FALSE)
-        
+
         hscrollbar = Scrollbar(self, orient = HORIZONTAL)
         hscrollbar.pack(fill = X, side = BOTTOM, expand = FALSE)
-        
+
         canvas = Canvas(self, bd = 0, highlightthickness = 0, yscrollcommand = vscrollbar.set, xscrollcommand = hscrollbar.set)
         canvas.pack(side = LEFT, fill = BOTH, expand = TRUE)
         vscrollbar.config(command = canvas.yview)
@@ -292,33 +291,37 @@ class Sync(Frame):
             m.update()
 
             br.open(link.url)
-            if br.geturl().endswith('.pdf') \
-                or br.geturl().endswith('forcedownload=1'):
+            url_text = br.geturl()
+            if br.geturl().endswith('forcedownload=1'):
+                url_text = br.geturl()[:-16]
+            url_text = '.' + url_text.rsplit('.', 1)[-1]
+            print url_text
+            if url_text == '.pdf' \
+                or url_text == '.doc' \
+                or url_text == '.ppt' \
+                or url_text == '.pptx':
 
                 if ']' in link.text:
                     if not os.path.exists(directory
-                            + link.text[link.text.index(']') + 1:]
-                            + '.pdf'):
+                            + link.text[link.text.index(']') + 1:] + url_text):
                         if not link.url in downloadlinks:
                             t.log('Downloading '
                                   + link.text[link.text.index(']')
-                                  + 1:] + '.pdf' + ' to ' + directory)
+                                  + 1:] + url_text + ' to ' + directory)
                             if not os.path.isdir(directory):
                                 os.makedirs(directory)
                             br.retrieve(link.url, directory
                                     + link.text[link.text.index(']')
-                                    + 1:] + '.pdf')
+                                    + 1:] + url_text)
                             downloadlinks.append(link.url)
                 else:
-                    if not os.path.exists(directory + link.text + '.pdf'
-                            ):
+                    if not os.path.exists(directory + link.text + url_text):
                         if not link.url in downloadlinks:
-                            t.log('Downloading ' + link.text + '.pdf'
-                                  + ' to ' + directory)
+                            t.log('Downloading ' + link.text
+                                  + url_text + ' to ' + directory)
                             if not os.path.isdir(directory):
                                 os.makedirs(directory)
-                            br.retrieve(link.url, directory + link.text
-                                    + '.pdf')
+                            br.retrieve(link.url, directory + link.text + url_text)
                             downloadlinks.append(link.url)
             else:
                 if br.geturl().startswith('http://moodle.iitb.ac.in/mod/folder'
@@ -346,7 +349,6 @@ class Sync(Frame):
         self.sync.config(state='disabled')
         self.pref.config(state='disabled')
         self.logout.config(state='disabled')
-        start_time = time.time()
         urls = []
         directories = []
         if os.path.exists('Preferences.txt'):
@@ -361,11 +363,7 @@ class Sync(Frame):
                         t.log('Retrieving from ' + (lines[4 * number+ 1])
                             [:lines[4 * number + 1].index('\n')] + ' at ' + directories[number])
                         self.retrieve(urls[number], directories[number])
-            t.log('Moodle is up-to-date!')
-            totaltime = time.time() - start_time
-            t.log('Time Taken: ' + str(int(totaltime / 60))
-                  + ' minutes and ' + str(int(totaltime % 60))
-                  + ' seconds!')
+            t.log('Successfully synced with Moodle!')
             self.sync.config(state='normal')
             self.pref.config(state='normal')
             self.logout.config(state='normal')
@@ -516,7 +514,6 @@ class box(Frame):
                     if str(coursename[number]) in str(lines[4 * number + 1]):
                         self.directory.set((lines[4 * number + 3])[:lines[4 * number + 3].index('\n')])
                     else:
-
                         self.directory.set('C:/')
             else:
                 self.directory.set('C:/')
@@ -555,6 +552,6 @@ m.wm_title('MooDLD')
 try:
     m.iconbitmap('moodle.ico')
 except:
-    t.log("Icon Not Found"+"Download moodle.ico to same directory!")
+    t.log("Icon Not Found. Keep `moodle.ico` in same directory!")
 l = LoginFrame(m)
 m.mainloop()
