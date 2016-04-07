@@ -296,10 +296,7 @@ class Sync(Frame):
                 url_text = br.geturl()[:-16]
             url_text = '.' + url_text.rsplit('.', 1)[-1]
             print url_text
-            if url_text == '.pdf' \
-                or url_text == '.doc' \
-                or url_text == '.ppt' \
-                or url_text == '.pptx':
+            if url_text in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx']:
 
                 if ']' in link.text:
                     if not os.path.exists(directory
