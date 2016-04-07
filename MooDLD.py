@@ -463,14 +463,14 @@ class Home(Frame):
 
         self.selectall = Button(self.frame.interior, text='Select All',
                                 command=self.sall)
-        self.selectall.grid(row=1, column=0)
+        self.selectall.grid(row=0, column=0)
         self.deselectall = Button(self.frame.interior,
                                   text='Deselect All',
                                   command=self.dall)
-        self.deselectall.grid(row=1, column=1, padx=[0, 100])
+        self.deselectall.grid(row=0, column=1, padx=[0, 100])
         self.save = Button(self.frame.interior, text='Save Settings',
                            command=self.save)
-        self.save.grid(row=1, column=2)
+        self.save.grid(row=0, column=2)
 
 
 class box(Frame):
@@ -487,7 +487,7 @@ class box(Frame):
         if len(directory) > 0:
             self.directory.set(directory)
             for i in range(len(courses)):
-                courses[i].directory.set(os.path.join(directory, coursename[i][:6]))
+                courses[i].directory.set(directory +'/' + coursename[i][:6])
         else:
             self.directory.set('C:/')
 
@@ -527,13 +527,12 @@ class box(Frame):
 
         else:
             self.directory = StringVar()
-            self.checkbox = Checkbutton(master.interior,
-                            text='Root Directory', width=60,
-                            variable=self.var)
-            self.checkbox.grid(row=0, column=0)
+            self.label = Label(master.interior,
+                            text='Root Directory', width=60)
+            self.label.grid(row=1, column=0)
             self.browse = Button(master.interior, text='Browse',
                                  command=self.rootgetdir)
-            self.browse.grid(row=0, column=1)
+            self.browse.grid(row=1, column=1)
 
             if os.path.exists('Cred.txt'):
                 file_pref = open('Cred.txt', 'r')
@@ -546,7 +545,7 @@ class box(Frame):
                 self.directory.set('C:/')
 
             self.label_dir = Label(master.interior, textvariable=self.directory)
-            self.label_dir.grid(row=0, column=2)
+            self.label_dir.grid(row=1, column=2)
 
 
 m = Tkinter.Tk()
