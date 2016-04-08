@@ -288,7 +288,6 @@ class Sync(Frame):
                     ) \
                 and not link.url.startswith('http://moodle.iitb.ac.in/message'
                     ) and link.url not in downloaded:
-                print link.url
                 self.links.append(link)
 
         for link in self.links:
