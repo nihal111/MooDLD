@@ -140,7 +140,7 @@ class savedata:
             self.chkbox = "0"
             self.directory = "C:/"
             self.lastnf = -1
-            self.lastnf = -1
+            self.lastmain = -1
             self.nflink = ""
 
 
@@ -376,15 +376,15 @@ class Sync(Frame):
         if os.path.exists('Preferences.txt'):
             file_pref = open('Preferences.txt', 'r')
             lines = file_pref.readlines()
-            n = len(lines) / 5
+            n = len(lines) / 7
             if len(lines):
                 for number in range(n):
-                    urls.append((lines[5 * number + 2])[:lines[5 * number + 2].index('\n')])
-                    directories.append((lines[5 * number + 3])[:lines[5 * number + 3].index('\n')])
-                    nfurls.append((lines[5*number+4])[:lines[5*number+4].index("\n")])
-                    if (lines[5 * number])[:lines[5 * number].index('\n')] == '1':
-                        t.log('Retrieving from ' + (lines[5 * number+ 1])
-                            [:lines[5 * number + 1].index('\n')] + ' at ' + directories[number])
+                    urls.append((lines[7 * number + 2])[:lines[7 * number + 2].index('\n')])
+                    directories.append((lines[7 * number + 3])[:lines[7 * number + 3].index('\n')])
+                    nfurls.append((lines[7*number+4])[:lines[7*number+4].index("\n")])
+                    if (lines[7 * number])[:lines[7 * number].index('\n')] == '1':
+                        t.log('Retrieving from ' + (lines[7 * number+ 1])
+                            [:lines[7 * number + 1].index('\n')] + ' at ' + directories[number])
                         self.retrieve(urls[number], directories[number])
             t.log('Successfully synced with Moodle!')
             self.sync.config(state='normal')
@@ -438,6 +438,8 @@ class Home(Frame):
             preferences.write(online_courses[i].mainlink + '\n')
             preferences.write(courseboxes[i].directory.get() + '\n')
             preferences.write(online_courses[i].nflink + '\n')
+            preferences.write(str(online_courses[i].lastmain) + '\n')
+            preferences.write(str(online_courses[i].lastnf) + '\n')
             courseboxes[i].pack_forget()
 
         preferences.close()
@@ -463,18 +465,18 @@ class Home(Frame):
         if os.path.exists('Preferences.txt'):
             file_pref = open('Preferences.txt', 'r')
             lines = file_pref.readlines()
-            TotalInPreferences = len(lines) / 5
+            TotalInPreferences = len(lines) / 7
             if len(lines):
                 for number in range(0, TotalInPreferences):
                     for i in range (0, n):
-                        if online_courses[i].mainlink in lines[5 * number + 2]:
+                        if online_courses[i].mainlink in lines[7 * number + 2]:
                             print "Found match for " + online_courses[i].name
-                            online_courses[i].directory = lines[5 * number + 3][:lines[5 * number + 3].index('\n')]
-                            online_courses[i].chkbox = lines[5 * number][:lines[5 * number].index('\n')]
-                            online_courses[i].nflink = lines[5 * number + 4][:lines[5 * number + 4].index('\n')]
+                            online_courses[i].directory = lines[7 * number + 3][:lines[7 * number + 3].index('\n')]
+                            online_courses[i].chkbox = lines[7 * number][:lines[7 * number].index('\n')]
+                            online_courses[i].nflink = lines[7 * number + 4][:lines[7 * number + 4].index('\n')]
                             break
                         else:
-                            print lines[5 * number + 2]
+                            print lines[7 * number + 2]
                             print online_courses[i].mainlink
 
         for i in range(0, n):
