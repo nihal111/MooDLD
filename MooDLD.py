@@ -14,7 +14,10 @@ br = mechanize.Browser()
 TotalInMoodle = 0
 TotalInPreferences = 0
 
-course = []
+mainlink = []
+nflink = []
+lastmain = []
+lastnf = []
 coursename = []
 save = []
 courses = []
@@ -133,12 +136,12 @@ class TraceConsole:  # Log Messages
 
 class savedata:
 
-    def __init__(self, chkbox, url, directory, name):
+    def __init__(self, chkbox, mainlink, directory, name, nflink):
         self.chkbox = chkbox
-        self.url = url
+        self.mainlink = mainlink
         self.directory = directory
         self.name = name
-
+        self.nflink = nflink
 
 class LoginFrame(Frame):
 
@@ -259,6 +262,7 @@ class Sync(Frame):
         self.logout=Button(self, text = "Logout", command = self.logout)
         self.logout.grid(row = 3,pady = 5)
 
+    
     def retrieve(self, url, directory):
         m.update()
         global t
@@ -284,7 +288,7 @@ class Sync(Frame):
                     ) \
                 and not link.url.startswith('http://moodle.iitb.ac.in/message'
                     ) and link.url not in downloaded:
-
+                print link.url
                 self.links.append(link)
 
         for link in self.links:
@@ -295,7 +299,6 @@ class Sync(Frame):
             if br.geturl().endswith('forcedownload=1'):
                 url_text = br.geturl()[:-16]
             url_text = '.' + url_text.rsplit('.', 1)[-1]
-            print url_text
             if url_text in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx']:
 
                 if ']' in link.text:
@@ -321,6 +324,7 @@ class Sync(Frame):
                             br.retrieve(link.url, directory + link.text + url_text)
                             downloadlinks.append(link.url)
             else:
+                #Retrieve from folders
                 if br.geturl().startswith('http://moodle.iitb.ac.in/mod/folder'
                         ) and link.url not in downloaded \
                     and link.text.startswith('[IMG]'):
@@ -332,6 +336,8 @@ class Sync(Frame):
                           + newpath)
                     downloaded.append(link.url)
                     self.retrieve(link.url, newpath + '/')
+
+                    #Retrieve Assignments
                 if br.geturl().startswith('http://moodle.iitb.ac.in/mod/assign') \
                                             and link.url not in downloaded:
                     downloaded.append(link.url)
@@ -340,6 +346,7 @@ class Sync(Frame):
             br.back()
             self.pack()
 
+    #On click of DLD Files button
     def dld(self):
         global t
         t.log('Downloading files, Please do not close until complete!')
@@ -351,14 +358,14 @@ class Sync(Frame):
         if os.path.exists('Preferences.txt'):
             file_pref = open('Preferences.txt', 'r')
             lines = file_pref.readlines()
-            n = len(lines) / 4
+            n = len(lines) / 5
             if len(lines):
                 for number in range(n):
-                    urls.append((lines[4 * number + 2])[:lines[4 * number + 2].index('\n')])
-                    directories.append((lines[4 * number + 3])[:lines[4 * number + 3].index('\n')])
-                    if (lines[4 * number])[:lines[4 * number].index('\n')] == '1':
-                        t.log('Retrieving from ' + (lines[4 * number+ 1])
-                            [:lines[4 * number + 1].index('\n')] + ' at ' + directories[number])
+                    urls.append((lines[5 * number + 2])[:lines[5 * number + 2].index('\n')])
+                    directories.append((lines[5 * number + 3])[:lines[5 * number + 3].index('\n')])
+                    if (lines[5 * number])[:lines[5 * number].index('\n')] == '1':
+                        t.log('Retrieving from ' + (lines[5 * number+ 1])
+                            [:lines[5 * number + 1].index('\n')] + ' at ' + directories[number])
                         self.retrieve(urls[number], directories[number])
             t.log('Successfully synced with Moodle!')
             self.sync.config(state='normal')
@@ -373,6 +380,8 @@ class Sync(Frame):
             self.newWindow = Home(self.master)
 
     def pref(self):
+        t.log("Populating list of courses. This may take a while. Please be patient..")
+        m.update()
         self.destroy()
         self.newWindow = Home(self.master)
 
@@ -406,12 +415,13 @@ class Home(Frame):
             x = str(courses[i].directory.get())
             if not x.endswith('/'):
                 courses[i].directory.set(x + '/')
-            save.append(savedata(courses[i].var.get(), course[i].url,
-                        courses[i].directory.get(), coursename[i]))
+            save.append(savedata(courses[i].var.get(), mainlink[i].url,
+                        courses[i].directory.get(), coursename[i], nflink[i].url))
             preferences.write(str(save[i].chkbox) + '\n')
             preferences.write(save[i].name + '\n')
-            preferences.write(save[i].url + '\n')
+            preferences.write(save[i].mainlink + '\n')
             preferences.write(save[i].directory + '\n')
+            preferences.write(save[i].nflink + '\n')
             courses[i].pack_forget()
         preferences.close()
         self.frame.destroy()
@@ -431,18 +441,31 @@ class Home(Frame):
 
         global myname
         del courses[:]
-        del course[:]
+        del mainlink[:]    # Array of all course links
+        del nflink[:]      # Array of all course links
+        del lastmain[:]    # Array of all course links
+        del lastnf[:]      # Array of all course links
         del coursename[:]
         del save[:]
+
         br.open('http://moodle.iitb.ac.in/')
         for link in \
             br.links(url_regex='http://moodle.iitb.ac.in/course/view.php'
                      ):
-            course.append(link)
+            mainlink.append(link)
             coursename.append(link.text)
+
+        for link in mainlink:
+                br.open(link.url)
+                self.alllinks =[]
+                
+                for link in br.links(url_regex='http://moodle.iitb.ac.in/mod/forum/view.php'):
+                    if ("?f=" not in link.url and not link.url.endswith('id=340')):
+                        nflink.append(link)
+
         global TotalInMoodle
-        TotalInMoodle = len(course)
-        n = len(course)
+        TotalInMoodle = len(mainlink)
+        n = len(mainlink)
 
         self.frame = VerticalScrolledFrame(m)
         self.frame.pack(fill=BOTH, expand=YES)
@@ -508,12 +531,12 @@ class box(Frame):
                 lines = file_pref.readlines()
                 global TotalInPreferences
                 global TotalInMoodle
-                TotalInPreferences = len(lines) / 4
+                TotalInPreferences = len(lines) / 5
                 if TotalInMoodle == TotalInPreferences:
-                    if (lines[4 * number])[:lines[4 * number].index('\n')] == '1':
+                    if (lines[5 * number])[:lines[5 * number].index('\n')] == '1':
                         self.checkbox.select()
-                    if str(coursename[number]) in str(lines[4 * number + 1]):
-                        self.directory.set((lines[4 * number + 3])[:lines[4 * number + 3].index('\n')])
+                    if str(coursename[number]) in str(lines[5 * number + 1]):
+                        self.directory.set((lines[5 * number + 3])[:lines[5 * number + 3].index('\n')])
                     else:
                         self.directory.set('C:/')
             else:
