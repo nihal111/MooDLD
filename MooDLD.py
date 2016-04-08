@@ -5,6 +5,7 @@ import tkMessageBox as tm
 import mechanize
 import tkFileDialog
 import os
+import time
 import logging
 import Tkinter
 
@@ -281,7 +282,69 @@ class Sync(Frame):
         self.logout=Button(self, text = "Logout", command = self.logout)
         self.logout.grid(row = 3,pady = 5)
 
-    
+    def nfretrieve(self, url, directory,number):           #Retrieve from News Forum when passed nfurl i.e forum/view.php
+        m.update()
+        global t
+        self.urls = []   # array of all discussion urls
+        self.nflinks = []
+        global downloaded
+        global downloadlinks
+        br.open(url)
+        #additions
+        preferences = open("Preferences.txt", "r")
+        lines = preferences.readlines()
+        lasturl= (lines[7*number+6])[:lines[7*number+6].index("\n")]
+        preferences.close()
+        
+        flag=0
+        
+        
+        ################
+        for link in br.links(url_regex="http://moodle.iitb.ac.in/mod/forum/discuss.php"):
+          if (link.url == lasturl):
+              break
+          if (link.url not in self.urls):
+              flag=1
+              self.urls.append(link.url)       #creates array of all discussion links
+              
+        if (flag==1):
+            newlasturl= self.urls[0]+'\n'
+            
+            lines[number*7+6]=newlasturl
+            preferences = open("Preferences.txt", "w")
+            preferences.writelines(lines)
+            preferences.close()
+            
+
+        for url in self.urls:                  #iterating through every discussion
+            m.update()
+            
+            br.open(url)                       #opening discussion page
+            
+            for link in br.links(url_regex="http://moodle.iitb.ac.in/pluginfile.php"):
+                self.nflinks.append(link)      #array of all downloadables
+                print link.url
+                  
+            for link in self.nflinks:
+                m.update()
+
+                br.open(link.url)
+                url_text = br.geturl()
+                if br.geturl().endswith('forcedownload=1'):
+                    url_text = br.geturl()[:-16]
+                file_extension = '.' + url_text.rsplit('.', 1)[-1]
+                file_name = (url_text.rsplit('.', 1)[0]).rsplit('/',1)[-1]
+                if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx']:
+                    if not os.path.exists(directory + file_name + file_extension):
+                        if not link.url in downloadlinks:
+                            t.log('Downloading ' + file_name
+                                  + file_extension + ' to ' + directory)
+                            if not os.path.isdir(directory):
+                                os.makedirs(directory)
+                            br.retrieve(link.url, directory + file_name + file_extension)
+                            downloadlinks.append(link.url)
+                
+
     def retrieve(self, url, directory):
         m.update()
         global t
@@ -316,30 +379,30 @@ class Sync(Frame):
             url_text = br.geturl()
             if br.geturl().endswith('forcedownload=1'):
                 url_text = br.geturl()[:-16]
-            url_text = '.' + url_text.rsplit('.', 1)[-1]
-            if url_text in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx']:
+            file_extension = '.' + url_text.rsplit('.', 1)[-1]
+            if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx']:
 
                 if ']' in link.text:
                     if not os.path.exists(directory
-                            + link.text[link.text.index(']') + 1:] + url_text):
+                            + link.text[link.text.index(']') + 1:] + file_extension):
                         if not link.url in downloadlinks:
                             t.log('Downloading '
                                   + link.text[link.text.index(']')
-                                  + 1:] + url_text + ' to ' + directory)
+                                  + 1:] + file_extension + ' to ' + directory)
                             if not os.path.isdir(directory):
                                 os.makedirs(directory)
                             br.retrieve(link.url, directory
                                     + link.text[link.text.index(']')
-                                    + 1:] + url_text)
+                                    + 1:] + file_extension)
                             downloadlinks.append(link.url)
                 else:
-                    if not os.path.exists(directory + link.text + url_text):
+                    if not os.path.exists(directory + link.text + file_extension):
                         if not link.url in downloadlinks:
                             t.log('Downloading ' + link.text
-                                  + url_text + ' to ' + directory)
+                                  + file_extension + ' to ' + directory)
                             if not os.path.isdir(directory):
                                 os.makedirs(directory)
-                            br.retrieve(link.url, directory + link.text + url_text)
+                            br.retrieve(link.url, directory + link.text + file_extension)
                             downloadlinks.append(link.url)
             else:
                 #Retrieve from folders
@@ -374,6 +437,8 @@ class Sync(Frame):
         urls = []
         nfurls = []
         directories = []
+        start_time = time.time()
+
         if os.path.exists('Preferences.txt'):
             file_pref = open('Preferences.txt', 'r')
             lines = file_pref.readlines()
@@ -387,7 +452,11 @@ class Sync(Frame):
                         t.log('Retrieving from ' + (lines[7 * number+ 1])
                             [:lines[7 * number + 1].index('\n')] + ' at ' + directories[number])
                         self.retrieve(urls[number], directories[number])
-            t.log('Successfully synced with Moodle!')
+                        t.log("Retrieving from "+ ((lines[7*number+1])[:lines[7*number+1].index("\n")]) + " News Forum at " + directories[number] + 'News Forum/')
+                        self.nfretrieve(nfurls[number], directories[number] + 'News Forum/', number)
+            t.log("MooDLD is up-to-date!")
+            totaltime= time.time() - start_time
+            t.log("Time Taken: " + str(int(totaltime/60)) +" minutes and " + str(int(totaltime%60)) + " seconds!")
             self.sync.config(state='normal')
             self.pref.config(state='normal')
             self.logout.config(state='normal')
