@@ -372,6 +372,7 @@ class Sync(Frame):
         self.pref.config(state='disabled')
         self.logout.config(state='disabled')
         urls = []
+        nfurls = []
         directories = []
         if os.path.exists('Preferences.txt'):
             file_pref = open('Preferences.txt', 'r')
@@ -535,7 +536,7 @@ class box(Frame):
         if len(directory) > 0:
             self.directory.set(directory)
             for i in range(len(courseboxes)):
-                courseboxes[i].directory.set(directory +'/' + coursename[i][:6])
+                courseboxes[i].directory.set(directory +'/' + online_courses[i].name[:6])
         else:
             self.directory.set('C:/')
 
