@@ -14,6 +14,7 @@ br = mechanize.Browser()
 TotalInMoodle = 0
 TotalInPreferences = 0
 
+
 courseboxes = []
 downloaded = []
 downloadlinks = []
@@ -438,6 +439,7 @@ class Home(Frame):
             preferences.write(courseboxes[i].directory.get() + '\n')
             preferences.write(online_courses[i].nflink + '\n')
             courseboxes[i].pack_forget()
+
         preferences.close()
         self.frame.destroy()
         self.newWindow = Sync(m)
@@ -548,11 +550,9 @@ class box(Frame):
                                  command=self.getdir)
             self.browse.grid(row=number + 3, column=1)
 
-            
             if online_courses[number].chkbox == '1':
                 self.checkbox.select()
             self.directory.set(online_courses[number].directory)
-        
             self.label_dir = Label(master.interior,
                                    textvariable=self.directory)
             self.label_dir.grid(row=number + 3, column=2)
