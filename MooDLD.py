@@ -14,16 +14,11 @@ br = mechanize.Browser()
 TotalInMoodle = 0
 TotalInPreferences = 0
 
-mainlink = []
-nflink = []
-lastmain = []
-lastnf = []
-coursename = []
-save = []
-courses = []
+courseboxes = []
 downloaded = []
 downloadlinks = []
-myname = ""
+online_courses = []
+myname = ''
 
 '''
 TTDs:
@@ -136,12 +131,35 @@ class TraceConsole:  # Log Messages
 
 class savedata:
 
-    def __init__(self, chkbox, mainlink, directory, name, nflink):
-        self.chkbox = chkbox
-        self.mainlink = mainlink
-        self.directory = directory
-        self.name = name
-        self.nflink = nflink
+    def __init__(self, mainlink, name, chkbox=None, directory=None, nflink=None, lastmain=None, lastnf=None):
+        
+        if chkbox is None:
+            self.mainlink = mainlink
+            self.name = name
+            self.chkbox = "0"
+            self.directory = "C:/"
+            self.lastnf = -1
+            self.lastnf = -1
+            self.nflink = ""
+
+
+        else:        
+            self.chkbox = chkbox
+            self.mainlink = mainlink
+            self.directory = directory
+            self.name = name
+            self.nflink = nflink
+            self.lastmain = lastmain
+            self.lastnf = lastnf
+
+    def get_nf_link(self):
+
+        br.open(self.mainlink)
+        for link in br.links(url_regex='http://moodle.iitb.ac.in/mod/forum/view.php'):
+            if ("?f=" not in link.url and not link.url.endswith('id=340')):
+                self.nflink = link.url
+                print link.url
+
 
 class LoginFrame(Frame):
 
@@ -288,7 +306,6 @@ class Sync(Frame):
                     ) \
                 and not link.url.startswith('http://moodle.iitb.ac.in/message'
                     ) and link.url not in downloaded:
-                print link.url
                 self.links.append(link)
 
         for link in self.links:
@@ -363,6 +380,7 @@ class Sync(Frame):
                 for number in range(n):
                     urls.append((lines[5 * number + 2])[:lines[5 * number + 2].index('\n')])
                     directories.append((lines[5 * number + 3])[:lines[5 * number + 3].index('\n')])
+                    nfurls.append((lines[5*number+4])[:lines[5*number+4].index("\n")])
                     if (lines[5 * number])[:lines[5 * number].index('\n')] == '1':
                         t.log('Retrieving from ' + (lines[5 * number+ 1])
                             [:lines[5 * number + 1].index('\n')] + ' at ' + directories[number])
@@ -400,29 +418,26 @@ class Home(Frame):
     def sall(self):
         n = len(course)
         for i in range(0, n):
-            courses[i].checkbox.select()
+            courseboxes[i].checkbox.select()
 
     def dall(self):
         n = len(course)
         for i in range(0, n):
-            courses[i].checkbox.deselect()
+            courseboxes[i].checkbox.deselect()
 
     def save(self):
-        n = len(courses)
         open('Preferences.txt', 'w').close()
         preferences = open('Preferences.txt', 'w')
-        for i in range(0, n):
-            x = str(courses[i].directory.get())
+        for i in range(0, len(online_courses)):
+            x = str(courseboxes[i].directory.get())
             if not x.endswith('/'):
-                courses[i].directory.set(x + '/')
-            save.append(savedata(courses[i].var.get(), mainlink[i].url,
-                        courses[i].directory.get(), coursename[i], nflink[i].url))
-            preferences.write(str(save[i].chkbox) + '\n')
-            preferences.write(save[i].name + '\n')
-            preferences.write(save[i].mainlink + '\n')
-            preferences.write(save[i].directory + '\n')
-            preferences.write(save[i].nflink + '\n')
-            courses[i].pack_forget()
+                courseboxes[i].directory.set(x + '/')
+            preferences.write(str(courseboxes[i].var.get()) + '\n')
+            preferences.write(online_courses[i].name + '\n')
+            preferences.write(online_courses[i].mainlink + '\n')
+            preferences.write(courseboxes[i].directory.get() + '\n')
+            preferences.write(online_courses[i].nflink + '\n')
+            courseboxes[i].pack_forget()
         preferences.close()
         self.frame.destroy()
         self.newWindow = Sync(m)
@@ -435,49 +450,56 @@ class Home(Frame):
         creds.writelines(lines)
         creds.close()
 
+    def load_online_courses(self):
+        br.open('http://moodle.iitb.ac.in/')
+
+        for link in br.links(url_regex='http://moodle.iitb.ac.in/course/view.php'):
+            online_courses.append(savedata(link.url, link.text))
+
+    def update_from_preferences(self, n):
+
+        if os.path.exists('Preferences.txt'):
+            file_pref = open('Preferences.txt', 'r')
+            lines = file_pref.readlines()
+            TotalInPreferences = len(lines) / 5
+            if len(lines):
+                for number in range(0, TotalInPreferences):
+                    for i in range (0, n):
+                        if online_courses[i].mainlink in lines[5 * number + 2]:
+                            print "Found match for " + online_courses[i].name
+                            online_courses[i].directory = lines[5 * number + 3][:lines[5 * number + 3].index('\n')]
+                            online_courses[i].chkbox = lines[5 * number][:lines[5 * number].index('\n')]
+                            online_courses[i].nflink = lines[5 * number + 4][:lines[5 * number + 4].index('\n')]
+                            break
+                        else:
+                            print lines[5 * number + 2]
+                            print online_courses[i].mainlink
+
+        for i in range(0, n):
+            if online_courses[i].nflink is "":
+                print "Finding news forum link for " + online_courses[i].name
+                online_courses[i].get_nf_link()    
+
     def __init__(self, master):
 
-        # Frame.__init__(self)
-
         global myname
-        del courses[:]
-        del mainlink[:]    # Array of all course links
-        del nflink[:]      # Array of all course links
-        del lastmain[:]    # Array of all course links
-        del lastnf[:]      # Array of all course links
-        del coursename[:]
-        del save[:]
+        del courseboxes[:]
+        del online_courses[:]
 
-        br.open('http://moodle.iitb.ac.in/')
-        for link in \
-            br.links(url_regex='http://moodle.iitb.ac.in/course/view.php'
-                     ):
-            mainlink.append(link)
-            coursename.append(link.text)
-
-        for link in mainlink:
-                br.open(link.url)
-                self.alllinks =[]
-                
-                for link in br.links(url_regex='http://moodle.iitb.ac.in/mod/forum/view.php'):
-                    if ("?f=" not in link.url and not link.url.endswith('id=340')):
-                        nflink.append(link)
+        self.load_online_courses()
 
         global TotalInMoodle
-        TotalInMoodle = len(mainlink)
-        n = len(mainlink)
+        TotalInMoodle = len(online_courses)
+        n = len(online_courses)
+
+        self.update_from_preferences(n)
 
         self.frame = VerticalScrolledFrame(m)
         self.frame.pack(fill=BOTH, expand=YES)
-        '''
-        self.Name = 'Welcome ' + myname
-        self.label_1 = Label(self.frame.interior, text=self.Name,
-                             justify=CENTER)
-        self.label_1.grid(row=0, column=0, columnspan=3)
-        '''
         self.root_dir_box = box(self.frame)
+
         for i in range(0, n):
-            courses.append(box(self.frame, i))
+            courseboxes.append(box(self.frame, i))
 
         self.selectall = Button(self.frame.interior, text='Select All',
                                 command=self.sall)
@@ -508,8 +530,8 @@ class box(Frame):
                 , title='Please select a directory')
         if len(directory) > 0:
             self.directory.set(directory)
-            for i in range(len(courses)):
-                courses[i].directory.set(directory +'/' + coursename[i][:6])
+            for i in range(len(courseboxes)):
+                courseboxes[i].directory.set(directory +'/' + coursename[i][:6])
         else:
             self.directory.set('C:/')
 
@@ -519,29 +541,18 @@ class box(Frame):
         if number is not None:
             self.directory = StringVar()
             self.checkbox = Checkbutton(master.interior,
-                                        text=coursename[number], width=60,
+                                        text=online_courses[number].name, width=60,
                                         variable=self.var)
             self.checkbox.grid(row=number + 3, column=0)
             self.browse = Button(master.interior, text='Browse',
                                  command=self.getdir)
             self.browse.grid(row=number + 3, column=1)
 
-            if os.path.exists('Preferences.txt'):
-                file_pref = open('Preferences.txt', 'r')
-                lines = file_pref.readlines()
-                global TotalInPreferences
-                global TotalInMoodle
-                TotalInPreferences = len(lines) / 5
-                if TotalInMoodle == TotalInPreferences:
-                    if (lines[5 * number])[:lines[5 * number].index('\n')] == '1':
-                        self.checkbox.select()
-                    if str(coursename[number]) in str(lines[5 * number + 1]):
-                        self.directory.set((lines[5 * number + 3])[:lines[5 * number + 3].index('\n')])
-                    else:
-                        self.directory.set('C:/')
-            else:
-                self.directory.set('C:/')
-
+            
+            if online_courses[number].chkbox == '1':
+                self.checkbox.select()
+            self.directory.set(online_courses[number].directory)
+        
             self.label_dir = Label(master.interior,
                                    textvariable=self.directory)
             self.label_dir.grid(row=number + 3, column=2)
