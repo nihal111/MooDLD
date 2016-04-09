@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import os
-import time
 import logging
 import urllib
 from Tkinter import *
@@ -19,7 +18,7 @@ br = mechanize.Browser()
 courseboxes = []
 #For keeping record of download pages
 downloaded = []
-#For keeping record of downloaded links 
+#For keeping record of downloaded links
 downloadlinks = []
 #For making an array of course_object objects, online from moodle
 online_courses = []
@@ -53,7 +52,7 @@ Home has following options:
     If a new course is found => get_nf_link() for that course. And set default parameters.
     Loads all online_courses as courseboxes (list of checkboxes and buttons).
 
-    Save Settings- Saves the courseboxes and their corresponding parameters from online_courses to "Preferences.txt". 
+    Save Settings- Saves the courseboxes and their corresponding parameters from online_courses to "Preferences.txt".
     (Except directory as it may be changed. Directory is saved from courseboxes)
 
 3.  Logout- Logs out and removes saved credentials and closes browser instance. Navigates to LoginFrame
@@ -151,7 +150,7 @@ class TraceConsole:
 class course_object:
 
     def __init__(self, mainlink, name, chkbox=None, directory=None, nflink=None, lastmain=None, lastnf=None):
-        
+
         #Initialised with only mainlink and name (when retrieving from the web)
         if chkbox is None:
             self.mainlink = mainlink
@@ -162,7 +161,7 @@ class course_object:
             self.lastmain = -1
             self.nflink = ""
 
-        else:        
+        else:
             self.chkbox = chkbox
             self.mainlink = mainlink
             self.directory = directory
@@ -317,10 +316,10 @@ class Home(Frame):
         lines = preferences.readlines()
         lasturl= (lines[7*number+6])[:lines[7*number+6].index("\n")]
         preferences.close()
-        
+
         #Set flag for checking if any new threads have been created since last run
         flag=0
-        
+
         #create an array of all discussion links (self.urls)
         for link in br.links(url_regex="http://moodle.iitb.ac.in/mod/forum/discuss.php"):
           if (link.url == lasturl):
@@ -329,26 +328,26 @@ class Home(Frame):
           if (link.url not in self.urls):
               flag=1
               self.urls.append(link.url)
-              
+
         #Find newlasturl (last visited disussion/thread) (Order of threads is in reverse. i.e Newest first)
         if (flag==1):
             newlasturl= self.urls[0]+'\n'
-            
+
             #Update Preferences.txt with newlasturl
             lines[number*7+6]=newlasturl
             preferences = open("Preferences.txt", "w")
             preferences.writelines(lines)
             preferences.close()
-            
+
         #iterating through every discussion
         for url in self.urls:
             m.update()
-            
+
             br.open(url)
-            
+
             #create an array of all downloadables
             for link in br.links(url_regex="http://moodle.iitb.ac.in/pluginfile.php"):
-                self.nflinks.append(link)     
+                self.nflinks.append(link)
 
             #Download all downloadables
             for link in self.nflinks:
@@ -369,7 +368,7 @@ class Home(Frame):
                                 os.makedirs(directory)
                             br.retrieve(link.url, directory + file_name + file_extension)
                             downloadlinks.append(link.url)
-                
+
 
     #Retrieve from course main page
     #Arguments are main page url, directory
@@ -381,7 +380,7 @@ class Home(Frame):
         self.links = []
         br.open(url)
 
-        #Find all links inside given url and form array (self.links) 
+        #Find all links inside given url and form array (self.links)
         for link in br.links(url_regex='.'):
             if not link.url.startswith('http://moodle.iitb.ac.in/login/logout.php'
                     ) and not link.url.startswith(br.geturl()) \
@@ -467,8 +466,6 @@ class Home(Frame):
         urls = []
         nfurls = []
         directories = []
-        #Start timer
-        start_time = time.time()
 
         #Open Preferences.txt and call retrieve functions
         if os.path.exists('Preferences.txt'):
@@ -486,9 +483,7 @@ class Home(Frame):
                         self.retrieve(urls[number], directories[number])
                         t.log("Retrieving from "+ ((lines[7*number+1])[:lines[7*number+1].index("\n")]) + " News Forum at " + directories[number] + 'News Forum/')
                         self.nfretrieve(nfurls[number], directories[number] + 'News Forum/', number)
-            t.log("MooDLD is up-to-date!")
-            totaltime= time.time() - start_time
-            t.log("Time Taken: " + str(int(totaltime/60)) +" minutes and " + str(int(totaltime%60)) + " seconds!")
+            t.log("Successfully synced with Moodle!")
             self.sync.config(state='normal')
             self.pref.config(state='normal')
             self.logout.config(state='normal')
@@ -601,7 +596,7 @@ class Pref_Screen(Frame):
         for i in range(0, n):
             if online_courses[i].nflink is "":
                 #print "Finding news forum link for " + online_courses[i].name
-                online_courses[i].get_nf_link()    
+                online_courses[i].get_nf_link()
 
     def __init__(self, master):
 
@@ -635,7 +630,7 @@ class Pref_Screen(Frame):
 
         self.f = Frame(self.frame.interior, height=20)
         self.f.grid(row=2, columnspan=3, sticky="we")
-        
+
 
 #Class for box object having checkbox, label, browsebutton
 class box(Frame):
