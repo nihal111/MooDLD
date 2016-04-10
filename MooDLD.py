@@ -409,7 +409,7 @@ class Home(Frame):
             if br.geturl().endswith('forcedownload=1'):
                 url_text = br.geturl()[:-16]
             file_extension = '.' + url_text.rsplit('.', 1)[-1]
-            if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx']:
+            if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx', '.cpp', '.h', '.html', '.py', '.css', '.tex']:
 
                 if ']' in link.text:
                     if not os.path.exists(directory
@@ -451,7 +451,16 @@ class Home(Frame):
                 if br.geturl().startswith('http://moodle.iitb.ac.in/mod/assign') \
                                             and link.url not in downloaded:
                     downloaded.append(link.url)
-                    self.retrieve(link.url, directory)
+                    print link.url
+                    if directory.endswith("Assignments/"):
+                        print br.geturl()
+                        print "dafaw"
+                        newpath = directory[:-1]
+                    else:
+                        newpath = directory + "Assignments"
+                    if not os.path.exists(newpath):
+                        os.makedirs(newpath)
+                    self.retrieve(link.url, newpath + '/')
 
             br.back()
             self.pack()
