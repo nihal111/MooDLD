@@ -24,6 +24,18 @@ downloadlinks = []
 online_courses = []
 #Stores name of user
 myname = ''
+#Boolean for whether DLD files is initiated once
+auto_download = False
+
+if os.path.exists('Cred.txt'):
+            file_pref = open('Cred.txt', 'r')
+            lines = file_pref.readlines()
+            if len(lines) > 4:
+                x = lines[4].replace('\n','')
+                if x == '1':
+                    auto_download = True
+
+
 
 '''
 Flow Of Control:
@@ -238,12 +250,14 @@ class LoginFrame(Frame):
                     text_file.write(str(self.keep_me_logged_in.get()) + '\n')
                     text_file.write(self.username.get() + '\n')
                     text_file.write(self.password.get() + '\n')
-                    text_file.write('C:/')
+                    text_file.write('C:/' + '\n')
+                    text_file.write('0' + '\n')
                 else:
                     text_file.write(str(self.keep_me_logged_in.get()) + '\n')
                     text_file.write('\n')
                     text_file.write('\n')
                     text_file.write('C:/')
+                    text_file.write('0' + '\n')
                 text_file.close()
 
                 self.login(self.username.get(), self.password.get())
@@ -296,6 +310,11 @@ class Home(Frame):
         self.pref.grid(row = 2,pady = 5)
         self.logout=Button(self, text = "Logout", command = self.logout)
         self.logout.grid(row = 3,pady = 5)
+
+        #Download automatically on launch
+        if auto_download is True:
+            t.log("Download automatically started. This can be disabled from preferences")
+            self.dld()  
 
     #Retrieve from News Forum when passed nfurl i.e forum/view.php
     #Passed arguments forum url, directory, course number (as appearing in Preferences.txt)
@@ -561,6 +580,7 @@ class Pref_Screen(Frame):
 
         creds = open('Cred.txt', 'w')
         lines[3] = self.root_dir_box.directory.get() + '\n'
+        lines [4] = str(self.auto.get()) + '\n'
         creds.writelines(lines)
         creds.close()
 
@@ -628,6 +648,19 @@ class Pref_Screen(Frame):
                            command=self.save)
         self.save.grid(row=0, column=2, pady=10)
 
+        self.auto = IntVar()
+        self.autoDLD = Checkbutton(self.frame.interior, text = "Auto-Download", width=20,
+                                        variable=self.auto)
+        self.autoDLD.grid(row=0, column =0, sticky="w")
+        
+        if os.path.exists('Cred.txt'):
+            file_pref = open('Cred.txt', 'r')
+            lines = file_pref.readlines()
+            if len(lines) > 4:
+                x = lines[4].replace('\n','')
+                if x == '1':
+                    self.autoDLD.select()
+
         self.f = Frame(self.frame.interior, height=20)
         self.f.grid(row=2, columnspan=3, sticky="we")
 
@@ -662,8 +695,8 @@ class box(Frame):
             self.directory = StringVar()
             self.checkbox = Checkbutton(master.interior,
                                         text=online_courses[number].name, width=60,
-                                        variable=self.var)
-            self.checkbox.grid(row=number + 3, column=0)
+                                        variable=self.var, anchor = "w")
+            self.checkbox.grid(row=number + 3, column=0, padx=5)
             self.browse = Button(master.interior, text='Browse',
                                  command=self.getdir)
             self.browse.grid(row=number + 3, column=1)
@@ -688,7 +721,7 @@ class box(Frame):
             if os.path.exists('Cred.txt'):
                 file_pref = open('Cred.txt', 'r')
                 lines = file_pref.readlines()
-                if len(lines) > 3:
+                if len(lines) > 4:
                     self.directory.set(lines[3].replace('\n',''))
                 else:
                     self.directory.set('C:/')
