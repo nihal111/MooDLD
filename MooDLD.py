@@ -1,13 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import os
-import logging
 import urllib
-from Tkinter import *
+from Tkinter import Frame, Label, Button, Checkbutton, IntVar, StringVar, Entry, Scrollbar, Canvas
 import tkMessageBox as tm
-import mechanize
 import tkFileDialog
 import Tkinter
+import mechanize
 
 moodle = 'http://moodle.iitb.ac.in/login/index.php'
 # Create a browser instance
@@ -28,12 +27,12 @@ myname = ''
 auto_download = False
 
 if os.path.exists('Cred.txt'):
-            file_pref = open('Cred.txt', 'r')
-            lines = file_pref.readlines()
-            if len(lines) > 4:
-                x = lines[4].replace('\n','')
-                if x == '1':
-                    auto_download = True
+    file_pref = open('Cred.txt', 'r')
+    lines = file_pref.readlines()
+    if len(lines) > 4:
+        x = lines[4].replace('\n', '')
+        if x == '1':
+            auto_download = True
 
 
 
@@ -72,23 +71,27 @@ Home has following options:
 '''
 
 
-#Creates a vertically and horizontally scrollable frame for Pref_Screen
 class ScrollableFrame(Frame):
+
+    '''
+    Creates a vertically and horizontally scrollable frame for Pref_Screen
+    '''
 
     def __init__(self, parent, *args, **kw):
         Frame.__init__(self, parent, *args, **kw)
 
         # create a canvas object and a vertical scrollbar for scrolling it
-        vscrollbar = Scrollbar(self, orient = VERTICAL)
-        vscrollbar.pack(fill = Y, side = RIGHT, expand = FALSE)
+        vscrollbar = Scrollbar(self, orient=Tkinter.VERTICAL)
+        vscrollbar.pack(fill=Tkinter.Y, side=Tkinter.RIGHT, expand=Tkinter.FALSE)
 
-        hscrollbar = Scrollbar(self, orient = HORIZONTAL)
-        hscrollbar.pack(fill = X, side = BOTTOM, expand = FALSE)
+        hscrollbar = Scrollbar(self, orient=Tkinter.HORIZONTAL)
+        hscrollbar.pack(fill=Tkinter.X, side=Tkinter.BOTTOM, expand=Tkinter.FALSE)
 
-        canvas = Canvas(self, bd = 0, highlightthickness = 0, yscrollcommand = vscrollbar.set, xscrollcommand = hscrollbar.set)
-        canvas.pack(side = LEFT, fill = BOTH, expand = TRUE)
-        vscrollbar.config(command = canvas.yview)
-        hscrollbar.config(command = canvas.xview)
+        canvas = Canvas(self, bd=0, highlightthickness=0,
+                        yscrollcommand=vscrollbar.set, xscrollcommand=hscrollbar.set)
+        canvas.pack(side=Tkinter.LEFT, fill=Tkinter.BOTH, expand=Tkinter.TRUE)
+        vscrollbar.config(command=canvas.yview)
+        hscrollbar.config(command=canvas.xview)
 
 
         # reset the view
@@ -99,45 +102,56 @@ class ScrollableFrame(Frame):
         # create a frame inside the canvas which will be scrolled with it
 
         self.interior = interior = Frame(canvas)
-        interior_id = canvas.create_window(0, 0, window=interior,
-                anchor=NW)
+        interior_id = canvas.create_window(0, 0, window=interior, anchor=Tkinter.NW)
 
         # track changes to the canvas and frame width and sync them,
         # also updating the scrollbar
 
         def _configure_interior(event):
-            # update the scrollbars to match the size of the inner frame
+
+            '''
+            update the scrollbars to match the size of the inner frame
+            '''
             size = (interior.winfo_reqwidth(), interior.winfo_reqheight())
             canvas.config(scrollregion='0 0 %s %s' % size)
             if interior.winfo_reqwidth() != canvas.winfo_width():
                 # update the canvas's width to fit the inner frame
-                canvas.config(width = interior.winfo_reqwidth())
+                canvas.config(width=interior.winfo_reqwidth())
         interior.bind('<Configure>', _configure_interior)
 
-        #_configure_canvas is used to resize the window size to fit content. Can be used when changing window.
         def _configure_canvas(event):
+
+            '''
+            _configure_canvas is used to resize the window size to fit content.
+            Can be used when changing window.
+            '''
+
             if interior.winfo_reqwidth() != canvas.winfo_width():
                 # update the inner frame's width to fill the canvas
-                canvas.itemconfigure(interior_id, width = canvas.winfo_width())
+                canvas.itemconfigure(interior_id, width=canvas.winfo_width())
         #calls the function _configure_canvas
         #canvas.bind('<Configure>', _configure_canvas)
 
-# Creates a Frame for Logging Messages
+
 class TraceConsole:
+
+    '''
+    Creates a Frame for Logging Messages
+    '''
 
     def __init__(self):
 
-        # Init the main GUI window
+        '''
+        Init the main GUI window
+        '''
 
         self._logFrame = Tkinter.Frame()
         self._log = Tkinter.Text(self._logFrame, wrap=Tkinter.NONE,
                                  setgrid=True, height=8, width=90)
-        self._scrollb = Tkinter.Scrollbar(self._logFrame,
-                orient=Tkinter.VERTICAL)
+        self._scrollb = Tkinter.Scrollbar(self._logFrame, orient=Tkinter.VERTICAL)
         self._scrollb.config(command=self._log.yview)
         self._log.config(yscrollcommand=self._scrollb.set)
-        self._scrolla = Tkinter.Scrollbar(self._logFrame,
-                orient=Tkinter.HORIZONTAL)
+        self._scrolla = Tkinter.Scrollbar(self._logFrame, orient=Tkinter.HORIZONTAL)
         self._scrolla.config(command=self._log.xview)
         self._log.config(xscrollcommand=self._scrolla.set)
 
@@ -152,16 +166,23 @@ class TraceConsole:
 
     def log(self, msg, level=None):
 
-        # Write on GUI
+        '''
+        Write on GUI
+        '''
 
         self._log.insert('end', msg + '\n')
         self._log.see(Tkinter.END)
 
 
-#A class for storing course_object consisting of course url, course name, checkbox status, directory, nf link, last url from main url, last url from nf
 class course_object:
 
-    def __init__(self, mainlink, name, chkbox=None, directory=None, nflink=None, lastmain=None, lastnf=None):
+    '''
+    A class for storing course_object consisting of course url, course name,
+    checkbox status, directory, nf link, last url from main url, last url from nf
+    '''
+
+    def __init__(self, mainlink, name, chkbox=None, directory=None,
+                 nflink=None, lastmain=None, lastnf=None):
 
         #Initialised with only mainlink and name (when retrieving from the web)
         if chkbox is None:
@@ -186,11 +207,15 @@ class course_object:
     def get_nf_link(self):
         br.open(self.mainlink)
         for link in br.links(url_regex='http://moodle.iitb.ac.in/mod/forum/view.php'):
-            if ("?f=" not in link.url and not link.url.endswith('id=340')):
+            if "?f=" not in link.url and not link.url.endswith('id=340'):
                 self.nflink = link.url
 
-#Frame for Login page
+
 class LoginFrame(Frame):
+
+    '''
+    Frame for login page.
+    '''
 
     def __init__(self, master):
         Frame.__init__(self)
@@ -200,8 +225,8 @@ class LoginFrame(Frame):
         self.username = Entry(self)
         self.password = Entry(self, show='*')
         self.keep_me_logged_in = IntVar()
-        self.username_label.grid(row=0, sticky=W)
-        self.password_label.grid(row=1, sticky=W)
+        self.username_label.grid(row=0, sticky=Tkinter.W)
+        self.password_label.grid(row=1, sticky=Tkinter.W)
         self.username.grid(row=0, column=1)
         self.password.grid(row=1, column=1)
 
@@ -239,8 +264,11 @@ class LoginFrame(Frame):
                                str((cred[2])[:cred[2].index('\n')]))
                     br.open(moodle)
 
-    # On login button click
     def _login_btn_clicked(self):
+
+        '''
+        On login button click
+        '''
         t.log('Attempting login...')
 
         #Check for connection and write to Cred.txt
@@ -251,19 +279,25 @@ class LoginFrame(Frame):
                     text_file.write(self.username.get() + '\n')
                     text_file.write(self.password.get() + '\n')
                     text_file.write('C:/' + '\n')
-                    text_file.write('0' + '\n')
+                    text_file.write('1' + '\n')
+                    #Default directory: C:/
+                    #Default auto download ON
                 else:
                     text_file.write(str(self.keep_me_logged_in.get()) + '\n')
                     text_file.write('\n')
                     text_file.write('\n')
                     text_file.write('C:/')
-                    text_file.write('0' + '\n')
+                    text_file.write('1' + '\n')
                 text_file.close()
 
                 self.login(self.username.get(), self.password.get())
 
-    #Submit form using arguments and set myname to username
     def login(self, username, password):
+
+        '''
+        Submit form using arguments and set myname to username
+        '''
+
         br.select_form(nr=0)
         br['username'] = username
         br['password'] = password
@@ -280,8 +314,12 @@ class LoginFrame(Frame):
         else:
             t.log('Incorrect username or password')
 
-    #Check for connection availability
     def check_connection(self):
+        
+        '''
+        Check for connection availability
+        '''
+
         try:
             br.open('http://moodle.iitb.ac.in/login/index.php')
             return 1
@@ -290,35 +328,47 @@ class LoginFrame(Frame):
             m.update()
             return 0
 
-    #Go to Home screen
     def new_window(self):
+
+        '''
+        Go to Home screen
+        '''
+
         self.destroy()
         self.newWindow = Home(self.master)
 
-#Frame for Home screen
+
 class Home(Frame):
 
-    def __init__(self,master):
+    '''
+    Frame for Home Screen.
+    '''
+
+    def __init__(self, master):
         Frame.__init__(self)
         self.pack()
         self.Name = 'Welcome ' + str(myname)
-        self.label_1 = Label(self, text = self.Name, justify = LEFT)
-        self.label_1.grid(row = 0,pady = 5)
-        self.sync= Button(self, text = "DLD Files",command = self.dld)
-        self.sync.grid(row = 1,pady = 5)
-        self.pref=Button(self, text = "Preferences", command = self.pref)
-        self.pref.grid(row = 2,pady = 5)
-        self.logout=Button(self, text = "Logout", command = self.logout)
-        self.logout.grid(row = 3,pady = 5)
+        self.label_1 = Label(self, text=self.Name, justify=Tkinter.LEFT)
+        self.label_1.grid(row=0, pady=5)
+        self.sync = Button(self, text="DLD Files", command=self.dld)
+        self.sync.grid(row=1, pady=5)
+        self.pref = Button(self, text="Preferences", command=self.pref)
+        self.pref.grid(row=2, pady=5)
+        self.logout = Button(self, text="Logout", command=self.logout)
+        self.logout.grid(row=3, pady=5)
 
         #Download automatically on launch
         if auto_download is True:
             t.log("Download automatically started. This can be disabled from preferences")
-            self.dld()  
+            self.dld()
 
-    #Retrieve from News Forum when passed nfurl i.e forum/view.php
-    #Passed arguments forum url, directory, course number (as appearing in Preferences.txt)
     def nfretrieve(self, url, directory, number):
+
+        '''
+        Retrieve from News Forum when passed nfurl i.e forum/view.php
+        Passed arguments forum url, directory, course number (as appearing in Preferences.txt)
+        '''
+
         m.update()
         global t
         #array of all discussion urls
@@ -333,27 +383,28 @@ class Home(Frame):
         #Read lines from Preferences. Obtain last visited discussion for course at index=number
         preferences = open("Preferences.txt", "r")
         lines = preferences.readlines()
-        lasturl= (lines[7*number+6])[:lines[7*number+6].index("\n")]
+        lasturl = (lines[7*number+6])[:lines[7*number+6].index("\n")]
         preferences.close()
 
         #Set flag for checking if any new threads have been created since last run
-        flag=0
+        flag = 0
 
         #create an array of all discussion links (self.urls)
         for link in br.links(url_regex="http://moodle.iitb.ac.in/mod/forum/discuss.php"):
-          if (link.url == lasturl):
-              break
-              #breaking loop once last visited discussion/thread is encountered
-          if (link.url not in self.urls):
-              flag=1
-              self.urls.append(link.url)
+            if link.url == lasturl:
+                break
+                #breaking loop once last visited discussion/thread is encountered
+            if link.url not in self.urls:
+                flag = 1
+                self.urls.append(link.url)
 
-        #Find newlasturl (last visited disussion/thread) (Order of threads is in reverse. i.e Newest first)
-        if (flag==1):
-            newlasturl= self.urls[0]+'\n'
+        #Find newlasturl (last visited disussion/thread)
+        #(Order of threads is in reverse. i.e Newest first)
+        if flag == 1:
+            newlasturl = self.urls[0]+'\n'
 
             #Update Preferences.txt with newlasturl
-            lines[number*7+6]=newlasturl
+            lines[number*7+6] = newlasturl
             preferences = open("Preferences.txt", "w")
             preferences.writelines(lines)
             preferences.close()
@@ -376,7 +427,7 @@ class Home(Frame):
                 if br.geturl().endswith('forcedownload=1'):
                     url_text = br.geturl()[:-16]
                 file_extension = '.' + url_text.rsplit('.', 1)[-1]
-                file_name = (url_text.rsplit('.', 1)[0]).rsplit('/',1)[-1]
+                file_name = (url_text.rsplit('.', 1)[0]).rsplit('/', 1)[-1]
                 file_name = urllib.unquote_plus(file_name)
                 if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx']:
                     if not os.path.exists(directory + file_name + file_extension):
@@ -389,9 +440,12 @@ class Home(Frame):
                             downloadlinks.append(link.url)
 
 
-    #Retrieve from course main page
-    #Arguments are main page url, directory
     def retrieve(self, url, directory):
+        '''
+        Retrieve from course main page
+        Arguments are main page url, directory
+        '''
+
         m.update()
         global t
         global downloaded
@@ -401,23 +455,17 @@ class Home(Frame):
 
         #Find all links inside given url and form array (self.links)
         for link in br.links(url_regex='.'):
-            if not link.url.startswith('http://moodle.iitb.ac.in/login/logout.php'
-                    ) and not link.url.startswith(br.geturl()) \
-                and not link.url.startswith('#') \
-                and not link.url.startswith('http://moodle.iitb.ac.in/mod/forum'
-                    ) \
-                and not link.url.startswith('http://moodle.iitb.ac.in/my'
-                    ) \
-                and not link.url.startswith('http://moodle.iitb.ac.in/user'
-                    ) \
-                and not link.url.startswith('http://moodle.iitb.ac.in/badges'
-                    ) \
-                and not link.url.startswith('http://moodle.iitb.ac.in/calendar'
-                    ) \
-                and not link.url.startswith('http://moodle.iitb.ac.in/grade'
-                    ) \
-                and not link.url.startswith('http://moodle.iitb.ac.in/message'
-                    ) and link.url not in downloaded:
+            if (not link.url.startswith('http://moodle.iitb.ac.in/login/logout.php')
+                    and not link.url.startswith(br.geturl())
+                    and not link.url.startswith('#')
+                    and not link.url.startswith('http://moodle.iitb.ac.in/mod/forum')
+                    and not link.url.startswith('http://moodle.iitb.ac.in/my')
+                    and not link.url.startswith('http://moodle.iitb.ac.in/user')
+                    and not link.url.startswith('http://moodle.iitb.ac.in/badges')
+                    and not link.url.startswith('http://moodle.iitb.ac.in/calendar')
+                    and not link.url.startswith('http://moodle.iitb.ac.in/grade')
+                    and not link.url.startswith('http://moodle.iitb.ac.in/message')
+                    and link.url not in downloaded):
                 self.links.append(link)
 
         #Downlod all downloadables from self.links
@@ -431,17 +479,15 @@ class Home(Frame):
             if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx']:
 
                 if ']' in link.text:
-                    if not os.path.exists(directory
-                            + link.text[link.text.index(']') + 1:] + file_extension):
+                    if not os.path.exists(directory + link.text[link.text.index(']') + 1:]
+                                          + file_extension):
                         if not link.url in downloadlinks:
-                            t.log('Downloading '
-                                  + link.text[link.text.index(']')
-                                  + 1:] + file_extension + ' to ' + directory)
+                            t.log('Downloading ' + link.text[link.text.index(']') + 1:]
+                                  + file_extension + ' to ' + directory)
                             if not os.path.isdir(directory):
                                 os.makedirs(directory)
-                            br.retrieve(link.url, directory
-                                    + link.text[link.text.index(']')
-                                    + 1:] + file_extension)
+                            br.retrieve(link.url, directory + link.text[link.text.index(']') + 1:]
+                                        + file_extension)
                             downloadlinks.append(link.url)
                 else:
                     if not os.path.exists(directory + link.text + file_extension):
@@ -454,9 +500,9 @@ class Home(Frame):
                             downloadlinks.append(link.url)
             else:
                 #Retrieve from folders
-                if br.geturl().startswith('http://moodle.iitb.ac.in/mod/folder'
-                        ) and link.url not in downloaded \
-                    and link.text.startswith('[IMG]'):
+                if (br.geturl().startswith('http://moodle.iitb.ac.in/mod/folder')
+                        and link.url not in downloaded
+                        and link.text.startswith('[IMG]')):
                     foldername = br.title()[br.title().index(':') + 2:]
                     newpath = directory + foldername
                     if not os.path.exists(newpath):
@@ -475,8 +521,13 @@ class Home(Frame):
             br.back()
             self.pack()
 
-    #On click of DLD Files button
+
     def dld(self):
+
+        '''
+        On click of DLD Files button
+        '''
+
         global t
         t.log('Downloading files, Please do not close until complete!')
         self.sync.config(state='disabled')
@@ -493,14 +544,15 @@ class Home(Frame):
             n = len(lines) / 7
             if len(lines):
                 for number in range(n):
-                    urls.append((lines[7 * number + 2])[:lines[7 * number + 2].index('\n')])
-                    directories.append((lines[7 * number + 3])[:lines[7 * number + 3].index('\n')])
-                    nfurls.append((lines[7*number+4])[:lines[7*number+4].index("\n")])
+                    urls.append(lines[7 * number + 2][:lines[7 * number + 2].index('\n')])
+                    directories.append(lines[7 * number + 3][:lines[7 * number + 3].index('\n')])
+                    nfurls.append(lines[7*number+4][:lines[7*number+4].index("\n")])
                     if (lines[7 * number])[:lines[7 * number].index('\n')] == '1':
-                        t.log('Retrieving from ' + (lines[7 * number+ 1])
-                            [:lines[7 * number + 1].index('\n')] + ' at ' + directories[number])
+                        t.log('Retrieving from ' + lines[7 * number+ 1]
+                              [:lines[7 * number + 1].index('\n')] + ' at ' + directories[number])
                         self.retrieve(urls[number], directories[number])
-                        t.log("Retrieving from "+ ((lines[7*number+1])[:lines[7*number+1].index("\n")]) + " News Forum at " + directories[number] + 'News Forum/')
+                        t.log("Retrieving from "+ lines[7*number+1][:lines[7*number+1].index("\n")]
+                              + " News Forum at " + directories[number] + 'News Forum/')
                         self.nfretrieve(nfurls[number], directories[number] + 'News Forum/', number)
             t.log("Successfully synced with Moodle!")
             self.sync.config(state='normal')
@@ -516,15 +568,24 @@ class Home(Frame):
             self.destroy()
             self.newWindow = Pref_Screen(self.master)
 
-    #On Click Preferences button
+
     def pref(self):
+
+        '''
+        On Click Preferences button
+        '''
+
         t.log("Populating list of courses. This may take a while. Please be patient..")
         m.update()
         self.destroy()
         self.newWindow = Pref_Screen(self.master)
 
-    #On Click Logout button
     def logout(self):
+
+        '''
+        On Click Logout button
+        '''
+
         text_file = open('Cred.txt', 'w')
         text_file.write('0\n')
         text_file.close()
@@ -533,24 +594,33 @@ class Home(Frame):
         self.destroy()
         self.newWindow = LoginFrame(self.master)
 
-#Frame for Preferences screen
+
 class Pref_Screen(Frame):
 
-    #On CLick Select All button
+    '''
+    Frame for Preferences screen.
+    '''
+
     def sall(self):
+        '''
+        On CLick Select All button
+        '''
         n = len(online_courses)
         for i in range(0, n):
             courseboxes[i].checkbox.select()
 
-    #On CLick Deselect All button
     def dall(self):
+        '''
+        On CLick Deselect All button
+        '''
         n = len(online_courses)
         for i in range(0, n):
             courseboxes[i].checkbox.deselect()
 
-    #On CLick Save Settings button
     def save(self):
-
+        '''
+        On CLick Save Settings button
+        '''
         #Saves courseboxes and online_courses data to Preferences.txt
         open('Preferences.txt', 'w').close()
         preferences = open('Preferences.txt', 'w')
@@ -580,31 +650,39 @@ class Pref_Screen(Frame):
 
         creds = open('Cred.txt', 'w')
         lines[3] = self.root_dir_box.directory.get() + '\n'
-        lines [4] = str(self.auto.get()) + '\n'
+        lines[4] = str(self.auto.get()) + '\n'
         creds.writelines(lines)
         creds.close()
 
-    #Finds all links for course main pages and creates course_object objects
     def load_online_courses(self):
+        '''
+        Finds all links for course main pages and creates course_object objects
+        '''
         br.open('http://moodle.iitb.ac.in/')
 
         for link in br.links(url_regex='http://moodle.iitb.ac.in/course/view.php'):
             online_courses.append(course_object(link.url, link.text))
 
-    #Finds courses from Preferences.txt and updates parameters for corresponding course in online_courses
     def update_from_preferences(self, n):
+        '''
+        Finds courses from Preferences.txt and updates parameters
+        for corresponding course in online_courses
+        '''
         if os.path.exists('Preferences.txt'):
             file_pref = open('Preferences.txt', 'r')
             lines = file_pref.readlines()
             TotalInPreferences = len(lines) / 7
             if len(lines):
                 for number in range(0, TotalInPreferences):
-                    for i in range (0, n):
+                    for i in range(0, n):
                         if online_courses[i].mainlink in lines[7 * number + 2]:
                             #print "Found match for " + online_courses[i].name
-                            online_courses[i].directory = lines[7 * number + 3][:lines[7 * number + 3].index('\n')]
-                            online_courses[i].chkbox = lines[7 * number][:lines[7 * number].index('\n')]
-                            online_courses[i].nflink = lines[7 * number + 4][:lines[7 * number + 4].index('\n')]
+                            online_courses[i].directory = lines[7 * number + 3]\
+                                                        [:lines[7 * number + 3].index('\n')]
+                            online_courses[i].chkbox = lines[7 * number]\
+                                                     [:lines[7 * number].index('\n')]
+                            online_courses[i].nflink = lines[7 * number + 4]\
+                                                     [:lines[7 * number + 4].index('\n')]
                             break
                         '''
                         else:
@@ -630,7 +708,7 @@ class Pref_Screen(Frame):
         self.update_from_preferences(n)
 
         self.frame = ScrollableFrame(m)
-        self.frame.pack(fill=BOTH, expand=YES)
+        self.frame.pack(fill=Tkinter.BOTH, expand=Tkinter.TRUE)
         self.root_dir_box = box(self.frame)
 
         #Create checkbox, label and browse button for all courses
@@ -649,15 +727,15 @@ class Pref_Screen(Frame):
         self.save.grid(row=0, column=2, pady=10)
 
         self.auto = IntVar()
-        self.autoDLD = Checkbutton(self.frame.interior, text = "Auto-Download", width=20,
-                                        variable=self.auto)
-        self.autoDLD.grid(row=0, column =0, sticky="w")
-        
+        self.autoDLD = Checkbutton(self.frame.interior, text="Auto-Download", width=20,
+                                   variable=self.auto)
+        self.autoDLD.grid(row=0, column=0, sticky="w")
+
         if os.path.exists('Cred.txt'):
             file_pref = open('Cred.txt', 'r')
             lines = file_pref.readlines()
             if len(lines) > 4:
-                x = lines[4].replace('\n','')
+                x = lines[4].replace('\n', '')
                 if x == '1':
                     self.autoDLD.select()
 
@@ -665,20 +743,28 @@ class Pref_Screen(Frame):
         self.f.grid(row=2, columnspan=3, sticky="we")
 
 
-#Class for box object having checkbox, label, browsebutton
+
 class box(Frame):
 
-    #On click for browse button of courses
+    '''
+    Class for box object having checkbox, label, browsebutton
+    '''
+
     def getdir(self):
-        directory = tkFileDialog.askdirectory(parent=m, initialdir='C:/'
-                , title='Please select a directory')
+        '''
+        On click for browse button of courses
+        '''
+        directory = tkFileDialog.askdirectory(parent=m, initialdir='C:/',
+                                              title='Please select a directory')
         if len(directory) > 0:
             self.directory.set(directory)
 
-    #On click for browse button for Root directory
     def rootgetdir(self):
-        directory = tkFileDialog.askdirectory(parent=m, initialdir='C:/'
-                , title='Please select a directory')
+        '''
+        On click for browse button for Root directory
+        '''
+        directory = tkFileDialog.askdirectory(parent=m, initialdir='C:/',
+                                              title='Please select a directory')
         if len(directory) > 0:
             self.directory.set(directory)
             for i in range(len(courseboxes)):
@@ -695,7 +781,7 @@ class box(Frame):
             self.directory = StringVar()
             self.checkbox = Checkbutton(master.interior,
                                         text=online_courses[number].name, width=60,
-                                        variable=self.var, anchor = "w")
+                                        variable=self.var, anchor="w")
             self.checkbox.grid(row=number + 3, column=0, padx=5)
             self.browse = Button(master.interior, text='Browse',
                                  command=self.getdir)
@@ -712,7 +798,7 @@ class box(Frame):
         else:
             self.directory = StringVar()
             self.label = Label(master.interior,
-                            text='Root Directory', width=60)
+                               text='Root Directory', width=60)
             self.label.grid(row=1, column=0)
             self.browse = Button(master.interior, text='Browse',
                                  command=self.rootgetdir)
@@ -722,7 +808,7 @@ class box(Frame):
                 file_pref = open('Cred.txt', 'r')
                 lines = file_pref.readlines()
                 if len(lines) > 4:
-                    self.directory.set(lines[3].replace('\n',''))
+                    self.directory.set(lines[3].replace('\n', ''))
                 else:
                     self.directory.set('C:/')
             else:
