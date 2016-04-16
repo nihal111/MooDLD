@@ -315,7 +315,7 @@ class LoginFrame(Frame):
             t.log('Incorrect username or password')
 
     def check_connection(self):
-        
+
         '''
         Check for connection availability
         '''
