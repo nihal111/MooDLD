@@ -409,7 +409,7 @@ class Home(Frame):
             if br.geturl().endswith('forcedownload=1'):
                 url_text = br.geturl()[:-16]
             file_extension = '.' + url_text.rsplit('.', 1)[-1]
-            if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx', '.cpp', '.h', '.html', '.py', '.css', '.tex']:
+            if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx', '.cpp', '.h', '.html', '.py', '.css', '.tex', '.java']:
 
                 if ']' in link.text:
                     if not os.path.exists(directory
