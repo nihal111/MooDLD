@@ -378,7 +378,7 @@ class Home(Frame):
                 file_extension = '.' + url_text.rsplit('.', 1)[-1]
                 file_name = (url_text.rsplit('.', 1)[0]).rsplit('/',1)[-1]
                 file_name = urllib.unquote_plus(file_name)
-                if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx']:
+                if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx', '.cpp', '.h', '.html', '.py', '.css', '.tex', '.java']:
                     if not os.path.exists(directory + file_name + file_extension):
                         if not link.url in downloadlinks:
                             t.log('Downloading ' + file_name
