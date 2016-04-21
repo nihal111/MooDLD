@@ -35,7 +35,6 @@ if os.path.exists('Cred.txt'):
             auto_download = True
 
 
-
 '''
 Flow Of Control:
 
@@ -69,7 +68,6 @@ Home has following options:
 3.  Logout- Logs out and removes saved credentials and closes browser instance. Navigates to LoginFrame
 
 '''
-
 
 class ScrollableFrame(Frame):
 
@@ -264,6 +262,7 @@ class LoginFrame(Frame):
                                str((cred[2])[:cred[2].index('\n')]))
                     br.open(moodle)
 
+    # On login button click
     def _login_btn_clicked(self):
 
         '''
@@ -292,6 +291,7 @@ class LoginFrame(Frame):
 
                 self.login(self.username.get(), self.password.get())
 
+    #Submit form using arguments and set myname to username
     def login(self, username, password):
 
         '''
@@ -315,7 +315,6 @@ class LoginFrame(Frame):
             t.log('Incorrect username or password')
 
     def check_connection(self):
-
         '''
         Check for connection availability
         '''
@@ -328,6 +327,7 @@ class LoginFrame(Frame):
             m.update()
             return 0
 
+    #Go to Home screen
     def new_window(self):
 
         '''
@@ -476,7 +476,7 @@ class Home(Frame):
             if br.geturl().endswith('forcedownload=1'):
                 url_text = br.geturl()[:-16]
             file_extension = '.' + url_text.rsplit('.', 1)[-1]
-            if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx']:
+            if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx', '.cpp', '.h', '.html', '.py', '.css', '.tex', '.java']:
 
                 if ']' in link.text:
                     if not os.path.exists(directory + link.text[link.text.index(']') + 1:]
@@ -516,7 +516,13 @@ class Home(Frame):
                 if br.geturl().startswith('http://moodle.iitb.ac.in/mod/assign') \
                                             and link.url not in downloaded:
                     downloaded.append(link.url)
-                    self.retrieve(link.url, directory)
+                    if directory.endswith("Assignments/"):
+                        newpath = directory[:-1]
+                    else:
+                        newpath = directory + "Assignments"
+                    if not os.path.exists(newpath):
+                        os.makedirs(newpath)
+                    self.retrieve(link.url, newpath + '/')
 
             br.back()
             self.pack()
@@ -568,7 +574,7 @@ class Home(Frame):
             self.destroy()
             self.newWindow = Pref_Screen(self.master)
 
-
+    #On Click Preferences button
     def pref(self):
 
         '''
@@ -580,6 +586,7 @@ class Home(Frame):
         self.destroy()
         self.newWindow = Pref_Screen(self.master)
 
+    #On Click Logout button
     def logout(self):
 
         '''
@@ -605,14 +612,17 @@ class Pref_Screen(Frame):
         '''
         On CLick Select All button
         '''
+
         n = len(online_courses)
         for i in range(0, n):
             courseboxes[i].checkbox.select()
 
+    #On CLick Deselect All button
     def dall(self):
         '''
         On CLick Deselect All button
         '''
+
         n = len(online_courses)
         for i in range(0, n):
             courseboxes[i].checkbox.deselect()
@@ -668,6 +678,7 @@ class Pref_Screen(Frame):
         Finds courses from Preferences.txt and updates parameters
         for corresponding course in online_courses
         '''
+
         if os.path.exists('Preferences.txt'):
             file_pref = open('Preferences.txt', 'r')
             lines = file_pref.readlines()
@@ -708,7 +719,9 @@ class Pref_Screen(Frame):
         self.update_from_preferences(n)
 
         self.frame = ScrollableFrame(m)
+
         self.frame.pack(fill=Tkinter.BOTH, expand=Tkinter.TRUE)
+
         self.root_dir_box = box(self.frame)
 
         #Create checkbox, label and browse button for all courses
@@ -743,9 +756,7 @@ class Pref_Screen(Frame):
         self.f.grid(row=2, columnspan=3, sticky="we")
 
 
-
 class box(Frame):
-
     '''
     Class for box object having checkbox, label, browsebutton
     '''
