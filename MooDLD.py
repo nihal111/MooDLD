@@ -451,10 +451,7 @@ class Home(Frame):
                 if br.geturl().startswith('http://moodle.iitb.ac.in/mod/assign') \
                                             and link.url not in downloaded:
                     downloaded.append(link.url)
-                    print link.url
                     if directory.endswith("Assignments/"):
-                        print br.geturl()
-                        print "dafaw"
                         newpath = directory[:-1]
                     else:
                         newpath = directory + "Assignments"
