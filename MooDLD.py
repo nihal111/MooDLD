@@ -35,8 +35,6 @@ if os.path.exists('Cred.txt'):
             auto_download = True
     file_pref.close()
 
-
-
 '''
 Flow Of Control:
 
@@ -274,7 +272,6 @@ class LoginFrame(Frame):
 
         #Check for connection and write to Cred.txt
         if self.check_connection():
-
             #Default cred.txt content excluding keep_me_logged_in, username and password.
             #Default directory: C:/ Default auto download ON 
             lines = ["\n","\n","\n","C:/\n","1\n"]
@@ -323,7 +320,6 @@ class LoginFrame(Frame):
             t.log('Incorrect username or password')
 
     def check_connection(self):
-        
         '''
         Check for connection availability
         '''
@@ -437,7 +433,7 @@ class Home(Frame):
                 file_extension = '.' + url_text.rsplit('.', 1)[-1]
                 file_name = (url_text.rsplit('.', 1)[0]).rsplit('/', 1)[-1]
                 file_name = urllib.unquote_plus(file_name)
-                if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx']:
+                if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx', '.cpp', '.h', '.html', '.py', '.css', '.tex', '.java']:
                     if not os.path.exists(directory + file_name + file_extension):
                         if not link.url in downloadlinks:
                             t.log('Downloading ' + file_name
@@ -484,7 +480,7 @@ class Home(Frame):
             if br.geturl().endswith('forcedownload=1'):
                 url_text = br.geturl()[:-16]
             file_extension = '.' + url_text.rsplit('.', 1)[-1]
-            if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx']:
+            if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx', '.cpp', '.h', '.html', '.py', '.css', '.tex', '.java']:
 
                 if ']' in link.text:
                     if not os.path.exists(directory + link.text[link.text.index(']') + 1:]
@@ -524,7 +520,13 @@ class Home(Frame):
                 if br.geturl().startswith('http://moodle.iitb.ac.in/mod/assign') \
                                             and link.url not in downloaded:
                     downloaded.append(link.url)
-                    self.retrieve(link.url, directory)
+                    if directory.endswith("Assignments/"):
+                        newpath = directory[:-1]
+                    else:
+                        newpath = directory + "Assignments"
+                    if not os.path.exists(newpath):
+                        os.makedirs(newpath)
+                    self.retrieve(link.url, newpath + '/')
 
             br.back()
             self.pack()
@@ -593,7 +595,6 @@ class Home(Frame):
         '''
         On Click Logout button
         '''
-
         lines = ["\n","\n","\n","C:/","\n","1","\n"]
         if os.path.exists("Cred.txt"):
             file_cred = open('Cred.txt', 'r')
@@ -607,7 +608,6 @@ class Home(Frame):
         file_cred = open('Cred.txt', 'w')
         file_cred.writelines(lines)
         file_cred.close()
-
         t.log('Logout successful!')
         br.close()
         self.destroy()
@@ -670,10 +670,10 @@ class Pref_Screen(Frame):
         creds = open('Cred.txt', 'w')
         lines[3] = self.root_dir_box.directory.get() + '\n'
         lines[4] = str(self.auto.get()) + '\n'
+        
         creds.writelines(lines) 
         creds.close()
 
-        
         #Add key to registry for startup launch
         if self.auto.get() == 1:
             add_to_startup()
@@ -695,6 +695,7 @@ class Pref_Screen(Frame):
         Finds courses from Preferences.txt and updates parameters
         for corresponding course in online_courses
         '''
+
         if os.path.exists('Preferences.txt'):
             file_pref = open('Preferences.txt', 'r')
             lines = file_pref.readlines()
@@ -735,7 +736,9 @@ class Pref_Screen(Frame):
         self.update_from_preferences(n)
 
         self.frame = ScrollableFrame(m)
+
         self.frame.pack(fill=Tkinter.BOTH, expand=Tkinter.TRUE)
+
         self.root_dir_box = box(self.frame)
 
         #Create checkbox, label and browse button for all courses
@@ -770,13 +773,11 @@ class Pref_Screen(Frame):
         self.f.grid(row=2, columnspan=3, sticky="we")
 
 
-
 class box(Frame):
-
     '''
     Class for box object having checkbox, label, browsebutton
     '''
-
+    
     def getdir(self):
         '''
         On click for browse button of courses
