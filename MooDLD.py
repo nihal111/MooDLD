@@ -33,6 +33,7 @@ if os.path.exists('Cred.txt'):
         x = lines[4].replace('\n', '')
         if x == '1':
             auto_download = True
+    file_pref.close()
 
 
 
@@ -259,7 +260,7 @@ class LoginFrame(Frame):
 
                 # if credentials are found, login. else do nothing
 
-                if int(cred[0][0]) == 1:
+                if cred[0][0] == "1":
                     self.login(str((cred[1])[:cred[1].index('\n')]),
                                str((cred[2])[:cred[2].index('\n')]))
                     br.open(moodle)
@@ -273,24 +274,31 @@ class LoginFrame(Frame):
 
         #Check for connection and write to Cred.txt
         if self.check_connection():
-            with open('Cred.txt', 'w') as text_file:
-                if self.keep_me_logged_in.get():
-                    text_file.write(str(self.keep_me_logged_in.get()) + '\n')
-                    text_file.write(self.username.get() + '\n')
-                    text_file.write(self.password.get() + '\n')
-                    text_file.write('C:/' + '\n')
-                    text_file.write('1' + '\n')
-                    #Default directory: C:/
-                    #Default auto download ON
-                else:
-                    text_file.write(str(self.keep_me_logged_in.get()) + '\n')
-                    text_file.write('\n')
-                    text_file.write('\n')
-                    text_file.write('C:/')
-                    text_file.write('1' + '\n')
-                text_file.close()
 
-                self.login(self.username.get(), self.password.get())
+            #Default cred.txt content excluding keep_me_logged_in, username and password.
+            #Default directory: C:/ Default auto download ON 
+            lines = ["\n","\n","\n","C:/\n","1\n"]
+            if os.path.exists("Cred.txt"):
+                file_cred = open('Cred.txt', 'r')
+                lines = file_cred.readlines()
+                file_cred.close()
+
+            lines[0] = str(self.keep_me_logged_in.get()) + '\n'
+            if self.keep_me_logged_in.get():
+                lines[1] = self.username.get() + '\n'
+                lines[2] = self.password.get() + '\n'
+            else:
+                lines[1] = '\n'
+                lines[2] = '\n'
+            
+            file_cred = open('Cred.txt', 'w')
+            file_cred.writelines(lines)
+            file_cred.close()
+
+            if lines[4][0] == "1":
+                add_to_startup()
+
+            self.login(self.username.get(), self.password.get())
 
     def login(self, username, password):
 
@@ -586,9 +594,20 @@ class Home(Frame):
         On Click Logout button
         '''
 
-        text_file = open('Cred.txt', 'w')
-        text_file.write('0\n')
-        text_file.close()
+        lines = ["\n","\n","\n","C:/","\n","1","\n"]
+        if os.path.exists("Cred.txt"):
+            file_cred = open('Cred.txt', 'r')
+            lines = file_cred.readlines()
+            file_cred.close()
+
+            lines[0] = '\n'
+            lines[1] = '\n'
+            lines[2] = '\n'
+
+        file_cred = open('Cred.txt', 'w')
+        file_cred.writelines(lines)
+        file_cred.close()
+
         t.log('Logout successful!')
         br.close()
         self.destroy()
@@ -651,8 +670,16 @@ class Pref_Screen(Frame):
         creds = open('Cred.txt', 'w')
         lines[3] = self.root_dir_box.directory.get() + '\n'
         lines[4] = str(self.auto.get()) + '\n'
-        creds.writelines(lines)
+        creds.writelines(lines) 
         creds.close()
+
+        
+        #Add key to registry for startup launch
+        if self.auto.get() == 1:
+            add_to_startup()
+        #Remove key from registry for starup launch
+        else:
+            remove_from_startup()
 
     def load_online_courses(self):
         '''
@@ -817,6 +844,13 @@ class box(Frame):
             self.label_dir = Label(master.interior, textvariable=self.directory)
             self.label_dir.grid(row=1, column=2)
 
+def add_to_startup():
+    #Find path to exe file from current working directory
+    exe_path = os.path.join(os.getcwd(),"MooDLD.exe")
+    os.popen("REG ADD \"HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\" /V \"MooDLD\" /t REG_SZ /F /D " + exe_path)
+
+def remove_from_startup():
+    os.popen("REG DELETE \"HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\" /V \"MooDLD\" /F")
 
 #Main Program
 m = Tkinter.Tk()
