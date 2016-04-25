@@ -28,8 +28,8 @@ myname = ''
 auto_download = False
 key="nihalarpantrehan"
 
-if os.path.exists('Cred.txt'):
-    file_pref = open('Cred.txt', 'r')
+if os.path.exists('Cred'):
+    file_pref = open('Cred', 'r')
     lines = file_pref.readlines()
     if len(lines) > 4:
         x = lines[4].replace('\n', '')
@@ -56,15 +56,15 @@ If saved credentials are found it moves on to Home.
 -----
 Home has following options:
 
-1.  DLD files- Checks if "Preferences.txt" exists. If not Pref_Screen is opened.
+1.  DLD files- Checks if "Preferences" exists. If not Pref_Screen is opened.
     Else, courses stored in preferences are opened and their materials retrieved.
 
 2.  Preferences- Open the Pref_Screen which loads online_courses[] from moodle.
-    Checks for existence of courses in "Preferences.txt", if found, online_courses[i] parameters for corresponding course are updated.
+    Checks for existence of courses in "Preferences", if found, online_courses[i] parameters for corresponding course are updated.
     If a new course is found => get_nf_link() for that course. And set default parameters.
     Loads all online_courses as courseboxes (list of checkboxes and buttons).
 
-    Save Settings- Saves the courseboxes and their corresponding parameters from online_courses to "Preferences.txt".
+    Save Settings- Saves the courseboxes and their corresponding parameters from online_courses to "Preferences".
     (Except directory as it may be changed. Directory is saved from courseboxes)
 
 3.  Logout- Logs out and removes saved credentials and closes browser instance. Navigates to LoginFrame
@@ -252,10 +252,10 @@ class LoginFrame(Frame):
         br = mechanize.Browser()
         t.log('Opening Moodle...')
 
-        # If Cred.txt exists check for saved credentials
+        # If Cred exists check for saved credentials
 
-        if self.check_connection() and os.path.exists('Cred.txt'):
-            with open('Cred.txt', 'r') as Cred:
+        if self.check_connection() and os.path.exists('Cred'):
+            with open('Cred', 'r') as Cred:
                 cred = Cred.readlines()
 
                 # if credentials are found, login. else do nothing
@@ -273,13 +273,13 @@ class LoginFrame(Frame):
         '''
         t.log('Attempting login...')
 
-        #Check for connection and write to Cred.txt
+        #Check for connection and write to Cred
         if self.check_connection():
-            #Default cred.txt content excluding keep_me_logged_in, username and password.
+            #Default cred content excluding keep_me_logged_in, username and password.
             #Default directory: C:/ Default auto download ON 
             lines = ["\n","\n","\n","Select Root Directory for all courses\n","1\n"]
-            if os.path.exists("Cred.txt"):
-                file_cred = open('Cred.txt', 'r')
+            if os.path.exists("Cred"):
+                file_cred = open('Cred', 'r')
                 lines = file_cred.readlines()
                 file_cred.close()
 
@@ -294,7 +294,7 @@ class LoginFrame(Frame):
                 lines[1] = '\n'
                 lines[2] = '\n'
             
-            file_cred = open('Cred.txt', 'w')
+            file_cred = open('Cred', 'w')
             file_cred.writelines(lines)
             file_cred.close()
 
@@ -376,7 +376,7 @@ class Home(Frame):
 
         '''
         Retrieve from News Forum when passed nfurl i.e forum/view.php
-        Passed arguments forum url, directory, course number (as appearing in Preferences.txt)
+        Passed arguments forum url, directory, course number (as appearing in Preferences)
         '''
 
         m.update()
@@ -391,7 +391,7 @@ class Home(Frame):
         br.open(url)
 
         #Read lines from Preferences. Obtain last visited discussion for course at index=number
-        preferences = open("Preferences.txt", "r")
+        preferences = open("Preferences", "r")
         lines = preferences.readlines()
         lasturl = (lines[7*number+6])[:lines[7*number+6].index("\n")]
         preferences.close()
@@ -413,9 +413,9 @@ class Home(Frame):
         if flag == 1:
             newlasturl = self.urls[0]+'\n'
 
-            #Update Preferences.txt with newlasturl
+            #Update Preferences with newlasturl
             lines[number*7+6] = newlasturl
-            preferences = open("Preferences.txt", "w")
+            preferences = open("Preferences", "w")
             preferences.writelines(lines)
             preferences.close()
 
@@ -553,9 +553,9 @@ class Home(Frame):
         nfurls = []
         directories = []
 
-        #Open Preferences.txt and call retrieve functions
-        if os.path.exists('Preferences.txt'):
-            file_pref = open('Preferences.txt', 'r')
+        #Open Preferences and call retrieve functions
+        if os.path.exists('Preferences'):
+            file_pref = open('Preferences', 'r')
             lines = file_pref.readlines()
             n = len(lines) / 7
             if len(lines):
@@ -575,7 +575,7 @@ class Home(Frame):
             self.pref.config(state='normal')
             self.logout.config(state='normal')
 
-            #If Preferences.txt does not exist take user to Preferences screen
+            #If Preferences does not exist take user to Preferences screen
         else:
             t.log('Please set Preferences first!')
             self.sync.config(state='normal')
@@ -602,8 +602,8 @@ class Home(Frame):
         On Click Logout button
         '''
         lines = ["\n","\n","\n","C:/","\n","1","\n"]
-        if os.path.exists("Cred.txt"):
-            file_cred = open('Cred.txt', 'r')
+        if os.path.exists("Cred"):
+            file_cred = open('Cred', 'r')
             lines = file_cred.readlines()
             file_cred.close()
 
@@ -611,7 +611,7 @@ class Home(Frame):
             lines[1] = '\n'
             lines[2] = '\n'
 
-        file_cred = open('Cred.txt', 'w')
+        file_cred = open('Cred', 'w')
         file_cred.writelines(lines)
         file_cred.close()
         t.log('Logout successful!')
@@ -646,9 +646,9 @@ class Pref_Screen(Frame):
         '''
         On CLick Save Settings button
         '''
-        #Saves courseboxes and online_courses data to Preferences.txt
-        open('Preferences.txt', 'w').close()
-        preferences = open('Preferences.txt', 'w')
+        #Saves courseboxes and online_courses data to Preferences
+        open('Preferences', 'w').close()
+        preferences = open('Preferences', 'w')
         for i in range(0, len(online_courses)):
             x = str(courseboxes[i].directory.get())
             if not x.endswith('/'):
@@ -668,12 +668,12 @@ class Pref_Screen(Frame):
         self.frame.destroy()
         self.newWindow = Home(m)
 
-        #Save root directory address to Cred.txt
-        creds = open('Cred.txt', 'r')
+        #Save root directory address to Cred
+        creds = open('Cred', 'r')
         lines = creds.readlines()
         creds.close()
 
-        creds = open('Cred.txt', 'w')
+        creds = open('Cred', 'w')
         lines[3] = self.root_dir_box.directory.get() + '\n'
         lines[4] = str(self.auto.get()) + '\n'
         
@@ -698,12 +698,12 @@ class Pref_Screen(Frame):
 
     def update_from_preferences(self, n):
         '''
-        Finds courses from Preferences.txt and updates parameters
+        Finds courses from Preferences and updates parameters
         for corresponding course in online_courses
         '''
 
-        if os.path.exists('Preferences.txt'):
-            file_pref = open('Preferences.txt', 'r')
+        if os.path.exists('Preferences'):
+            file_pref = open('Preferences', 'r')
             lines = file_pref.readlines()
             TotalInPreferences = len(lines) / 7
             if len(lines):
@@ -767,8 +767,8 @@ class Pref_Screen(Frame):
                                    variable=self.auto)
         self.autoDLD.grid(row=0, column=0, sticky="w")
 
-        if os.path.exists('Cred.txt'):
-            file_pref = open('Cred.txt', 'r')
+        if os.path.exists('Cred'):
+            file_pref = open('Cred', 'r')
             lines = file_pref.readlines()
             if len(lines) > 4:
                 x = lines[4].replace('\n', '')
@@ -838,8 +838,8 @@ class box(Frame):
                                  command=self.rootgetdir)
             self.browse.grid(row=1, column=1)
 
-            if os.path.exists('Cred.txt'):
-                file_pref = open('Cred.txt', 'r')
+            if os.path.exists('Cred'):
+                file_pref = open('Cred', 'r')
                 lines = file_pref.readlines()
                 if len(lines) > 4:
                     self.directory.set(lines[3].replace('\n', ''))
