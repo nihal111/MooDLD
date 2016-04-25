@@ -7,6 +7,7 @@ import tkMessageBox as tm
 import tkFileDialog
 import Tkinter
 import mechanize
+import pyDes
 
 moodle = 'http://moodle.iitb.ac.in/login/index.php'
 # Create a browser instance
@@ -25,6 +26,7 @@ online_courses = []
 myname = ''
 #Boolean for whether DLD files is initiated once
 auto_download = False
+key="nihalarpantrehan"
 
 if os.path.exists('Cred.txt'):
     file_pref = open('Cred.txt', 'r')
@@ -259,8 +261,9 @@ class LoginFrame(Frame):
                 # if credentials are found, login. else do nothing
 
                 if cred[0][0] == "1":
-                    self.login(str((cred[1])[:cred[1].index('\n')]),
-                               str((cred[2])[:cred[2].index('\n')]))
+                    decrypted_username = pyDes.triple_des(key).decrypt(str((cred[1])[:cred[1].index('\n')]), padmode = pyDes.PAD_PKCS5)
+                    decrypted_password = pyDes.triple_des(key).decrypt(str((cred[2])[:cred[2].index('\n')]), padmode = pyDes.PAD_PKCS5)
+                    self.login(decrypted_username, decrypted_password)
                     br.open(moodle)
 
     def _login_btn_clicked(self):
@@ -274,7 +277,7 @@ class LoginFrame(Frame):
         if self.check_connection():
             #Default cred.txt content excluding keep_me_logged_in, username and password.
             #Default directory: C:/ Default auto download ON 
-            lines = ["\n","\n","\n","C:/\n","1\n"]
+            lines = ["\n","\n","\n","Select Root Directory for all courses\n","1\n"]
             if os.path.exists("Cred.txt"):
                 file_cred = open('Cred.txt', 'r')
                 lines = file_cred.readlines()
@@ -282,8 +285,11 @@ class LoginFrame(Frame):
 
             lines[0] = str(self.keep_me_logged_in.get()) + '\n'
             if self.keep_me_logged_in.get():
-                lines[1] = self.username.get() + '\n'
-                lines[2] = self.password.get() + '\n'
+                encrypted_username = pyDes.triple_des(key).encrypt(self.username.get(),  padmode = pyDes.PAD_PKCS5)
+                encrypted_password = pyDes.triple_des(key).encrypt(self.password.get(),  padmode = pyDes.PAD_PKCS5)
+                lines[1] = encrypted_username + '\n'
+                lines[2] = encrypted_password + '\n'
+
             else:
                 lines[1] = '\n'
                 lines[2] = '\n'
