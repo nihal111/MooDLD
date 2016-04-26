@@ -276,7 +276,7 @@ class LoginFrame(Frame):
         #Check for connection and write to Cred
         if self.check_connection():
             #Default cred content excluding keep_me_logged_in, username and password.
-            #Default directory: C:/ Default auto download ON 
+            #Default directory: C:/ Default auto download ON
             lines = ["\n","\n","\n","Select Root Directory for all courses\n","1\n"]
             if os.path.exists("Cred"):
                 file_cred = open('Cred', 'r')
@@ -293,7 +293,7 @@ class LoginFrame(Frame):
             else:
                 lines[1] = '\n'
                 lines[2] = '\n'
-            
+
             file_cred = open('Cred', 'w')
             file_cred.writelines(lines)
             file_cred.close()
@@ -439,7 +439,10 @@ class Home(Frame):
                 file_extension = '.' + url_text.rsplit('.', 1)[-1]
                 file_name = (url_text.rsplit('.', 1)[0]).rsplit('/', 1)[-1]
                 file_name = urllib.unquote_plus(file_name)
-                if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx', '.cpp', '.h', '.html', '.py', '.css', '.tex', '.java']:
+                if file_name.endswith(file_extension):
+                    file_name = file_name[:-len(file_extension)]
+                if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx',
+                                      '.cpp', '.h', '.html', '.py', '.css', '.tex', '.java']:
                     if not os.path.exists(directory + file_name + file_extension):
                         if not link.url in downloadlinks:
                             t.log('Downloading ' + file_name
@@ -486,28 +489,28 @@ class Home(Frame):
             if br.geturl().endswith('forcedownload=1'):
                 url_text = br.geturl()[:-16]
             file_extension = '.' + url_text.rsplit('.', 1)[-1]
-            if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx', '.cpp', '.h', '.html', '.py', '.css', '.tex', '.java']:
+            if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx',
+                                  '.cpp', '.h', '.html', '.py', '.css', '.tex', '.java']:
 
+                file_name = ""
                 if ']' in link.text:
-                    if not os.path.exists(directory + link.text[link.text.index(']') + 1:]
-                                          + file_extension):
-                        if not link.url in downloadlinks:
-                            t.log('Downloading ' + link.text[link.text.index(']') + 1:]
-                                  + file_extension + ' to ' + directory)
-                            if not os.path.isdir(directory):
-                                os.makedirs(directory)
-                            br.retrieve(link.url, directory + link.text[link.text.index(']') + 1:]
-                                        + file_extension)
-                            downloadlinks.append(link.url)
+                    global file_name
+                    file_name = link.text[link.text.index(']') + 1:]
                 else:
-                    if not os.path.exists(directory + link.text + file_extension):
-                        if not link.url in downloadlinks:
-                            t.log('Downloading ' + link.text
-                                  + file_extension + ' to ' + directory)
-                            if not os.path.isdir(directory):
-                                os.makedirs(directory)
-                            br.retrieve(link.url, directory + link.text + file_extension)
-                            downloadlinks.append(link.url)
+                    global file_name
+                    file_name = link.text
+
+                if file_name.endswith(file_extension):
+                    file_name = file_name[:-len(file_extension)]
+
+                if not os.path.exists(directory + file_name + file_extension):
+                    if not link.url in downloadlinks:
+                        t.log('Downloading ' + file_name
+                              + file_extension + ' to ' + directory)
+                        if not os.path.isdir(directory):
+                            os.makedirs(directory)
+                        br.retrieve(link.url, directory + file_name + file_extension)
+                        downloadlinks.append(link.url)
             else:
                 #Retrieve from folders
                 if (br.geturl().startswith('http://moodle.iitb.ac.in/mod/folder')
@@ -676,8 +679,8 @@ class Pref_Screen(Frame):
         creds = open('Cred', 'w')
         lines[3] = self.root_dir_box.directory.get() + '\n'
         lines[4] = str(self.auto.get()) + '\n'
-        
-        creds.writelines(lines) 
+
+        creds.writelines(lines)
         creds.close()
 
         #Add key to registry for startup launch
@@ -783,7 +786,7 @@ class box(Frame):
     '''
     Class for box object having checkbox, label, browsebutton
     '''
-    
+
     def getdir(self):
         '''
         On click for browse button of courses
