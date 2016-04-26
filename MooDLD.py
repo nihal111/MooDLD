@@ -7,7 +7,7 @@ import tkMessageBox as tm
 import tkFileDialog
 import Tkinter
 import mechanize
-import pyDes
+from Crypto.Cipher import DES
 
 moodle = 'http://moodle.iitb.ac.in/login/index.php'
 # Create a browser instance
@@ -26,7 +26,6 @@ online_courses = []
 myname = ''
 #Boolean for whether DLD files is initiated once
 auto_download = False
-key="nihalarpantrehan"
 
 if os.path.exists('Cred'):
     file_pref = open('Cred', 'r')
@@ -261,8 +260,10 @@ class LoginFrame(Frame):
                 # if credentials are found, login. else do nothing
 
                 if cred[0][0] == "1":
-                    decrypted_username = pyDes.triple_des(key).decrypt(str((cred[1])[:cred[1].index('\n')]), padmode = pyDes.PAD_PKCS5)
-                    decrypted_password = pyDes.triple_des(key).decrypt(str((cred[2])[:cred[2].index('\n')]), padmode = pyDes.PAD_PKCS5)
+                    des = DES.new('01234567', DES.MODE_ECB)
+                    space_pass = des.decrypt(str((cred[2])[:cred[2].index('\n')]))[-1:]
+                    decrypted_username = des.decrypt(str((cred[1])[:cred[1].index('\n')]))
+                    decrypted_password = des.decrypt(str((cred[2])[:cred[2].index('\n')]))[:-(int(space_pass))]
                     self.login(decrypted_username, decrypted_password)
                     br.open(moodle)
 
@@ -272,7 +273,6 @@ class LoginFrame(Frame):
         On login button click
         '''
         t.log('Attempting login...')
-
         #Check for connection and write to Cred
         if self.check_connection():
             #Default cred content excluding keep_me_logged_in, username and password.
@@ -285,8 +285,14 @@ class LoginFrame(Frame):
 
             lines[0] = str(self.keep_me_logged_in.get()) + '\n'
             if self.keep_me_logged_in.get():
-                encrypted_username = pyDes.triple_des(key).encrypt(self.username.get(),  padmode = pyDes.PAD_PKCS5)
-                encrypted_password = pyDes.triple_des(key).encrypt(self.password.get(),  padmode = pyDes.PAD_PKCS5)
+                des = DES.new('01234567', DES.MODE_ECB)
+                username = self.username.get()
+                password = self.password.get()
+                space_pass = 8 - len(password) % 8
+                username += ' ' * (8 - len(username) % 8)
+                password = password + ' ' * ((8 - len(password) % 8) - 1) + str(space_pass)
+                encrypted_username = des.encrypt(username)
+                encrypted_password = des.encrypt(password)
                 lines[1] = encrypted_username + '\n'
                 lines[2] = encrypted_password + '\n'
 
@@ -494,10 +500,8 @@ class Home(Frame):
 
                 file_name = ""
                 if ']' in link.text:
-                    global file_name
                     file_name = link.text[link.text.index(']') + 1:]
                 else:
-                    global file_name
                     file_name = link.text
 
                 if file_name.endswith(file_extension):
