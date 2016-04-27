@@ -11,6 +11,7 @@ It downloads all the files from the listed courses to the user's computer.
 
 1. Tkinter
 2. Mechanize
+3. pyCrypto
 
 ### Instructions for use
 
@@ -25,6 +26,10 @@ It downloads all the files from the listed courses to the user's computer.
   On Ubuntu use `sudo apt-get install python-tk`<br>
   On Mac `Tkinter` is installed by default when you install python
 
+  - **pyCrypto**<br/>
+  Install using pip<br/>
+  `pip install pycrypto`
+
 3. Run using `python MooDLD.py`
 
 4. The user has to login using LDAP ID/Password. <br/>(**Keep me logged in** can be checked to avoid entering credentials repeatedly)
@@ -33,7 +38,7 @@ It downloads all the files from the listed courses to the user's computer.
 
 6. Click "Save Settings" to save the settings for further use. These can be changed by visiting the **Preferences** page any time.
 
-7. The user has to click on the **DLD Files** button to download files of selected courses from Moodle.
+7. The user has to click on the **DLD Files** button to download files of selected courses from Moodle. Auto-Download feature is also available.
 
 
 The application creates two `.txt` files in the directory in which it is kept - `Cred.txt` and `Preferences.txt`.
