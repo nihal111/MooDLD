@@ -293,8 +293,6 @@ class LoginFrame(Frame):
                 password = password + ' ' * ((8 - len(password) % 8) - 1) + str(space_pass)
                 encrypted_username = des.encrypt(username).encode('hex')
                 encrypted_password = des.encrypt(password).encode('hex')
-                print encrypted_username
-                print encrypted_password
                 lines[1] = encrypted_username + '\n'
                 lines[2] = encrypted_password + '\n'
 
@@ -719,7 +717,6 @@ class Pref_Screen(Frame):
                 for number in range(0, TotalInPreferences):
                     for i in range(0, n):
                         if online_courses[i].mainlink in lines[7 * number + 2]:
-                            #print "Found match for " + online_courses[i].name
                             online_courses[i].directory = lines[7 * number + 3]\
                                                         [:lines[7 * number + 3].index('\n')]
                             online_courses[i].chkbox = lines[7 * number]\
@@ -727,16 +724,10 @@ class Pref_Screen(Frame):
                             online_courses[i].nflink = lines[7 * number + 4]\
                                                      [:lines[7 * number + 4].index('\n')]
                             break
-                        '''
-                        else:
-                            print lines[7 * number + 2]
-                            print online_courses[i].mainlink
-                        '''
 
         #get_nf_link for all courses that don't have an nflink
         for i in range(0, n):
             if online_courses[i].nflink is "":
-                #print "Finding news forum link for " + online_courses[i].name
                 online_courses[i].get_nf_link()
 
     def __init__(self, master):
