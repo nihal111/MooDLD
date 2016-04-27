@@ -261,9 +261,9 @@ class LoginFrame(Frame):
 
                 if cred[0][0] == "1":
                     des = DES.new('01234567', DES.MODE_ECB)
-                    space_pass = des.decrypt(str((cred[2])[:cred[2].index('\n')]))[-1:]
-                    decrypted_username = des.decrypt(str((cred[1])[:cred[1].index('\n')]))
-                    decrypted_password = des.decrypt(str((cred[2])[:cred[2].index('\n')]))[:-(int(space_pass))]
+                    space_pass = des.decrypt(str((cred[2])[:cred[2].index('\n')]).decode('hex'))[-1:]
+                    decrypted_username = des.decrypt(str((cred[1])[:cred[1].index('\n')]).decode('hex'))
+                    decrypted_password = des.decrypt(str((cred[2])[:cred[2].index('\n')]).decode('hex'))[:-(int(space_pass))]
                     self.login(decrypted_username, decrypted_password)
                     br.open(moodle)
 
@@ -291,8 +291,10 @@ class LoginFrame(Frame):
                 space_pass = 8 - len(password) % 8
                 username += ' ' * (8 - len(username) % 8)
                 password = password + ' ' * ((8 - len(password) % 8) - 1) + str(space_pass)
-                encrypted_username = des.encrypt(username)
-                encrypted_password = des.encrypt(password)
+                encrypted_username = des.encrypt(username).encode('hex')
+                encrypted_password = des.encrypt(password).encode('hex')
+                print encrypted_username
+                print encrypted_password
                 lines[1] = encrypted_username + '\n'
                 lines[2] = encrypted_password + '\n'
 
