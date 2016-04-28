@@ -411,6 +411,7 @@ class Home(Frame):
         flag = 0
 
         #create an array of all discussion links (self.urls)
+        #Newer threads come first in br.links()
         for link in br.links(url_regex="http://moodle.iitb.ac.in/mod/forum/discuss.php"):
             if link.url == lasturl:
                 break
@@ -418,17 +419,6 @@ class Home(Frame):
             if link.url not in self.urls:
                 flag = 1
                 self.urls.append(link.url)
-
-        #Find newlasturl (last visited disussion/thread)
-        #(Order of threads is in reverse. i.e Newest first)
-        if flag == 1:
-            newlasturl = self.urls[0]+'\n'
-
-            #Update Preferences with newlasturl
-            lines[number*7+6] = newlasturl
-            preferences = open("Preferences", "w")
-            preferences.writelines(lines)
-            preferences.close()
 
         #iterating through every discussion
         for url in self.urls:
@@ -443,6 +433,8 @@ class Home(Frame):
             #Download all downloadables
             for link in self.nflinks:
                 if stop_DLD:
+                    #Set flag 0 so that newlasturl is not updated, as all new threads may not be downloaded when force killed.
+                    flag=0
                     break
                 else:
                     m.update()
@@ -465,6 +457,17 @@ class Home(Frame):
                                     os.makedirs(directory)
                                 br.retrieve(link.url, directory + file_name + file_extension)
                                 downloadlinks.append(link.url)
+
+        #Find newlasturl (last visited disussion/thread)
+        #(Order of threads is in reverse. i.e Newest first)
+        if flag == 1:
+            newlasturl = self.urls[0]+'\n'
+
+            #Update Preferences with newlasturl
+            lines[number*7+6] = newlasturl
+            preferences = open("Preferences", "w")
+            preferences.writelines(lines)
+            preferences.close()
 
 
     def retrieve(self, url, directory):
