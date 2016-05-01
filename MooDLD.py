@@ -381,7 +381,7 @@ class Home(Frame):
         #Download automatically on launch
         if auto_download is True:
             t.log("Download automatically started. This can be disabled from preferences")
-            self.dld()
+            self.DLD()
 
     def nfretrieve(self, url, directory, number):
 
@@ -433,7 +433,7 @@ class Home(Frame):
             #Download all downloadables
             for link in self.nflinks:
                 if stop_DLD:
-                    #Set flag 0 so that newlasturl is not updated, as all new threads may not be downloaded when force killed.
+                    #Set flag 0 so that newlasturl is not updated, as all new threads may not be downloaded when force killedself.
                     flag=0
                     break
                 else:
@@ -882,10 +882,10 @@ class box(Frame):
 def add_to_startup():
     #Find path to exe file from current working directory
     exe_path = os.path.join(os.getcwd(),"MooDLD.exe")
-    os.popen("REG ADD \"HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\" /V \"MooDLD\" /t REG_SZ /F /D " + exe_path)
+    pipe = os.popen('REG ADD "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /V "MooDLD" /t REG_SZ /F /D ' + '"' + exe_path + '"')
 
 def remove_from_startup():
-    os.popen("REG DELETE \"HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\" /V \"MooDLD\" /F")
+    os.popen('REG DELETE "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /V "MooDLD" /F')
 
 #Main Program
 m = Tkinter.Tk()
