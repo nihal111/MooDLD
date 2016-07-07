@@ -24,6 +24,8 @@ downloadlinks = []
 online_courses = []
 #Stores name of user
 myname = ''
+#Boolean for force terminate Download
+stop_DLD = False
 #Boolean for whether DLD files is initiated once
 auto_download = False
 
@@ -366,17 +368,20 @@ class Home(Frame):
         self.Name = 'Welcome ' + str(myname)
         self.label_1 = Label(self, text=self.Name, justify=Tkinter.LEFT)
         self.label_1.grid(row=0, pady=5)
-        self.sync = Button(self, text="DLD Files", command=self.dld)
+        self.sync = Button(self, text="DLD Files", command=self.DLD)
         self.sync.grid(row=1, pady=5)
         self.pref = Button(self, text="Preferences", command=self.pref)
-        self.pref.grid(row=2, pady=5)
+        self.pref.grid(row=3, pady=5)
         self.logout = Button(self, text="Logout", command=self.logout)
-        self.logout.grid(row=3, pady=5)
+        self.logout.grid(row=4, pady=5)
+        self.stop = Button(self, text="Stop DLD", command=self.stopDLD)
+        self.stop.grid(row=2, pady=5)
+        self.stop.config(state='disabled')
 
         #Download automatically on launch
         if auto_download is True:
             t.log("Download automatically started. This can be disabled from preferences")
-            self.dld()
+            self.DLD()
 
     def nfretrieve(self, url, directory, number):
 
@@ -406,6 +411,7 @@ class Home(Frame):
         flag = 0
 
         #create an array of all discussion links (self.urls)
+        #Newer threads come first in br.links()
         for link in br.links(url_regex="http://moodle.iitb.ac.in/mod/forum/discuss.php"):
             if link.url == lasturl:
                 break
@@ -413,17 +419,6 @@ class Home(Frame):
             if link.url not in self.urls:
                 flag = 1
                 self.urls.append(link.url)
-
-        #Find newlasturl (last visited disussion/thread)
-        #(Order of threads is in reverse. i.e Newest first)
-        if flag == 1:
-            newlasturl = self.urls[0]+'\n'
-
-            #Update Preferences with newlasturl
-            lines[number*7+6] = newlasturl
-            preferences = open("Preferences", "w")
-            preferences.writelines(lines)
-            preferences.close()
 
         #iterating through every discussion
         for url in self.urls:
@@ -437,26 +432,42 @@ class Home(Frame):
 
             #Download all downloadables
             for link in self.nflinks:
-                m.update()
-                br.open(link.url)
-                url_text = br.geturl()
-                if br.geturl().endswith('forcedownload=1'):
-                    url_text = br.geturl()[:-16]
-                file_extension = '.' + url_text.rsplit('.', 1)[-1]
-                file_name = (url_text.rsplit('.', 1)[0]).rsplit('/', 1)[-1]
-                file_name = urllib.unquote_plus(file_name)
-                if file_name.endswith(file_extension):
-                    file_name = file_name[:-len(file_extension)]
-                if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx',
-                                      '.cpp', '.h', '.html', '.py', '.css', '.tex', '.java']:
-                    if not os.path.exists(directory + file_name + file_extension):
-                        if not link.url in downloadlinks:
-                            t.log('Downloading ' + file_name
-                                  + file_extension + ' to ' + directory)
-                            if not os.path.isdir(directory):
-                                os.makedirs(directory)
-                            br.retrieve(link.url, directory + file_name + file_extension)
-                            downloadlinks.append(link.url)
+                if stop_DLD:
+                    #Set flag 0 so that newlasturl is not updated, as all new threads may not be downloaded when force killedself.
+                    flag=0
+                    break
+                else:
+                    m.update()
+                    br.open(link.url)
+                    url_text = br.geturl()
+                    if br.geturl().endswith('forcedownload=1'):
+                        url_text = br.geturl()[:-16]
+                    file_extension = '.' + url_text.rsplit('.', 1)[-1]
+                    file_name = (url_text.rsplit('.', 1)[0]).rsplit('/', 1)[-1]
+                    file_name = urllib.unquote_plus(file_name)
+                    if file_name.endswith(file_extension):
+                        file_name = file_name[:-len(file_extension)]
+                    if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx',
+                                          '.cpp', '.h', '.html', '.py', '.css', '.tex', '.java']:
+                        if not os.path.exists(directory + file_name + file_extension):
+                            if not link.url in downloadlinks:
+                                t.log('Downloading ' + file_name
+                                      + file_extension + ' to ' + directory)
+                                if not os.path.isdir(directory):
+                                    os.makedirs(directory)
+                                br.retrieve(link.url, directory + file_name + file_extension)
+                                downloadlinks.append(link.url)
+
+        #Find newlasturl (last visited disussion/thread)
+        #(Order of threads is in reverse. i.e Newest first)
+        if flag == 1:
+            newlasturl = self.urls[0]+'\n'
+
+            #Update Preferences with newlasturl
+            lines[number*7+6] = newlasturl
+            preferences = open("Preferences", "w")
+            preferences.writelines(lines)
+            preferences.close()
 
 
     def retrieve(self, url, directory):
@@ -489,76 +500,89 @@ class Home(Frame):
 
         #Downlod all downloadables from self.links
         for link in self.links:
-            m.update()
-            br.open(link.url)
-            url_text = br.geturl()
-            if br.geturl().endswith('forcedownload=1'):
-                url_text = br.geturl()[:-16]
-            file_extension = '.' + url_text.rsplit('.', 1)[-1]
-            if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx',
-                                  '.cpp', '.h', '.html', '.py', '.css', '.tex', '.java']:
-
-                file_name = ""
-                if ']' in link.text:
-                    file_name = link.text[link.text.index(']') + 1:]
-                else:
-                    file_name = link.text
-
-                if file_name.endswith(file_extension):
-                    file_name = file_name[:-len(file_extension)]
-
-                if not os.path.exists(directory + file_name + file_extension):
-                    if not link.url in downloadlinks:
-                        t.log('Downloading ' + file_name
-                              + file_extension + ' to ' + directory)
-                        if not os.path.isdir(directory):
-                            os.makedirs(directory)
-                        br.retrieve(link.url, directory + file_name + file_extension)
-                        downloadlinks.append(link.url)
+            if stop_DLD:
+                break
             else:
-                #Retrieve from folders
-                if (br.geturl().startswith('http://moodle.iitb.ac.in/mod/folder')
-                        and link.url not in downloaded
-                        and link.text.startswith('[IMG]')):
-                    foldername = br.title()[br.title().index(':') + 2:]
-                    newpath = directory + foldername
-                    if not os.path.exists(newpath):
-                        os.makedirs(newpath)
-                    t.log('Retrieving from ' + foldername + ' at '
-                          + newpath)
-                    downloaded.append(link.url)
-                    self.retrieve(link.url, newpath + '/')
+                m.update()
+                br.open(link.url)
+                url_text = br.geturl()
+                if br.geturl().endswith('forcedownload=1'):
+                    url_text = br.geturl()[:-16]
+                file_extension = '.' + url_text.rsplit('.', 1)[-1]
+                if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx',
+                                      '.cpp', '.h', '.html', '.py', '.css', '.tex', '.java']:
 
-                #Retrieve Assignments
-                if br.geturl().startswith('http://moodle.iitb.ac.in/mod/assign') \
-                                            and link.url not in downloaded:
-                    downloaded.append(link.url)
-                    if directory.endswith("Assignments/"):
-                        newpath = directory[:-1]
+                    file_name = ""
+                    if ']' in link.text:
+                        file_name = link.text[link.text.index(']') + 1:]
                     else:
-                        newpath = directory + "Assignments"
-                    if not os.path.exists(newpath):
-                        os.makedirs(newpath)
-                    self.retrieve(link.url, newpath + '/')
+                        file_name = link.text
 
-            br.back()
+                    if file_name.endswith(file_extension):
+                        file_name = file_name[:-len(file_extension)]
+
+                    if not os.path.exists(directory + file_name + file_extension):
+                        if not link.url in downloadlinks:
+                            t.log('Downloading ' + file_name
+                                  + file_extension + ' to ' + directory)
+                            if not os.path.isdir(directory):
+                                os.makedirs(directory)
+                            br.retrieve(link.url, directory + file_name + file_extension)
+                            downloadlinks.append(link.url)
+                else:
+                    #Retrieve from folders
+                    if (br.geturl().startswith('http://moodle.iitb.ac.in/mod/folder')
+                            and link.url not in downloaded
+                            and link.text.startswith('[IMG]')):
+                        foldername = br.title()[br.title().index(':') + 2:]
+                        newpath = directory + foldername
+                        if not os.path.exists(newpath):
+                            os.makedirs(newpath)
+                        t.log('Retrieving from ' + foldername + ' at '
+                              + newpath)
+                        downloaded.append(link.url)
+                        self.retrieve(link.url, newpath + '/')
+
+                    #Retrieve Assignments
+                    if br.geturl().startswith('http://moodle.iitb.ac.in/mod/assign') \
+                                                and link.url not in downloaded:
+                        downloaded.append(link.url)
+                        if directory.endswith("Assignments/"):
+                            newpath = directory[:-1]
+                        else:
+                            newpath = directory + "Assignments"
+                        if not os.path.exists(newpath):
+                            os.makedirs(newpath)
+                        self.retrieve(link.url, newpath + '/')
+
+            #br.back()
             self.pack()
 
+    def stopDLD(self):
+        '''
+        On click of Stop DLD button
+        '''
 
-    def dld(self):
+        global t, stop_DLD
+        t.log('Terminating downloads.')
+        stop_DLD = True
+
+    def DLD(self):
 
         '''
         On click of DLD Files button
         '''
 
-        global t
+        global t, stop_DLD
         t.log('Downloading files, Please do not close until complete!')
         self.sync.config(state='disabled')
         self.pref.config(state='disabled')
         self.logout.config(state='disabled')
+        self.stop.config(state='normal')
         urls = []
         nfurls = []
         directories = []
+        stop_DLD = False
 
         #Open Preferences and call retrieve functions
         if os.path.exists('Preferences'):
@@ -567,20 +591,24 @@ class Home(Frame):
             n = len(lines) / 7
             if len(lines):
                 for number in range(n):
-                    urls.append(lines[7 * number + 2][:lines[7 * number + 2].index('\n')])
-                    directories.append(lines[7 * number + 3][:lines[7 * number + 3].index('\n')])
-                    nfurls.append(lines[7*number+4][:lines[7*number+4].index("\n")])
-                    if (lines[7 * number])[:lines[7 * number].index('\n')] == '1':
-                        t.log('Retrieving from ' + lines[7 * number+ 1]
-                              [:lines[7 * number + 1].index('\n')] + ' at ' + directories[number])
-                        self.retrieve(urls[number], directories[number])
-                        t.log("Retrieving from "+ lines[7*number+1][:lines[7*number+1].index("\n")]
-                              + " News Forum at " + directories[number] + 'News Forum/')
-                        self.nfretrieve(nfurls[number], directories[number] + 'News Forum/', number)
+                    if stop_DLD:
+                        break
+                    else:
+                        urls.append(lines[7 * number + 2][:lines[7 * number + 2].index('\n')])
+                        directories.append(lines[7 * number + 3][:lines[7 * number + 3].index('\n')])
+                        nfurls.append(lines[7*number+4][:lines[7*number+4].index("\n")])
+                        if (lines[7 * number])[:lines[7 * number].index('\n')] == '1':
+                            t.log('Retrieving from ' + lines[7 * number+ 1]
+                                  [:lines[7 * number + 1].index('\n')] + ' at ' + directories[number])
+                            self.retrieve(urls[number], directories[number])
+                            t.log("Retrieving from "+ lines[7*number+1][:lines[7*number+1].index("\n")]
+                                  + " News Forum at " + directories[number] + 'News Forum/')
+                            self.nfretrieve(nfurls[number], directories[number] + 'News Forum/', number)
             t.log("Successfully synced with Moodle!")
             self.sync.config(state='normal')
             self.pref.config(state='normal')
             self.logout.config(state='normal')
+            self.stop.config(state='disabled')
 
             #If Preferences does not exist take user to Preferences screen
         else:
@@ -854,10 +882,10 @@ class box(Frame):
 def add_to_startup():
     #Find path to exe file from current working directory
     exe_path = os.path.join(os.getcwd(),"MooDLD.exe")
-    os.popen("REG ADD \"HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\" /V \"MooDLD\" /t REG_SZ /F /D " + exe_path)
+    pipe = os.popen('REG ADD "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /V "MooDLD" /t REG_SZ /F /D ' + '"' + exe_path + '"')
 
 def remove_from_startup():
-    os.popen("REG DELETE \"HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\" /V \"MooDLD\" /F")
+    os.popen('REG DELETE "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /V "MooDLD" /F')
 
 #Main Program
 m = Tkinter.Tk()
