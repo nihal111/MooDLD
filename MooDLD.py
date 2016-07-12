@@ -3,7 +3,6 @@
 import os
 import urllib
 from Tkinter import Frame, Label, Button, Checkbutton, IntVar, StringVar, Entry, Scrollbar, Canvas
-import tkMessageBox as tm
 import tkFileDialog
 import Tkinter
 import mechanize
@@ -13,20 +12,20 @@ moodle = 'http://moodle.iitb.ac.in/login/index.php'
 # Create a browser instance
 br = mechanize.Browser()
 
-#Declaring global arrays
-#For box objects in Pref_Screen. Consists of checkbox, label and button
+# Declaring global arrays
+# For box objects in Pref_Screen. Consists of checkbox, label and button
 courseboxes = []
-#For keeping record of download pages
+# For keeping record of download pages
 downloaded = []
-#For keeping record of downloaded links
+# For keeping record of downloaded links
 downloadlinks = []
-#For making an array of course_object objects, online from moodle
+# For making an array of course_object objects, online from moodle
 online_courses = []
-#Stores name of user
+# Stores name of user
 myname = ''
-#Boolean for force terminate Download
+# Boolean for force terminate Download
 stop_DLD = False
-#Boolean for whether DLD files is initiated once
+# Boolean for whether DLD files is initiated once
 auto_download = False
 
 if os.path.exists('Cred'):
@@ -38,7 +37,7 @@ if os.path.exists('Cred'):
             auto_download = True
     file_pref.close()
 
-'''
+"""
 Flow Of Control:
 
 1. m=Tkinter.Tk()
@@ -70,14 +69,14 @@ Home has following options:
 
 3.  Logout- Logs out and removes saved credentials and closes browser instance. Navigates to LoginFrame
 
-'''
+"""
 
 
 class ScrollableFrame(Frame):
 
-    '''
+    """
     Creates a vertically and horizontally scrollable frame for Pref_Screen
-    '''
+    """
 
     def __init__(self, parent, *args, **kw):
         Frame.__init__(self, parent, *args, **kw)
@@ -111,9 +110,9 @@ class ScrollableFrame(Frame):
 
         def _configure_interior(event):
 
-            '''
+            """
             update the scrollbars to match the size of the inner frame
-            '''
+            """
             size = (interior.winfo_reqwidth(), interior.winfo_reqheight())
             canvas.config(scrollregion='0 0 %s %s' % size)
             if interior.winfo_reqwidth() != canvas.winfo_width():
@@ -123,29 +122,29 @@ class ScrollableFrame(Frame):
 
         def _configure_canvas(event):
 
-            '''
+            """
             _configure_canvas is used to resize the window size to fit content.
             Can be used when changing window.
-            '''
+            """
 
             if interior.winfo_reqwidth() != canvas.winfo_width():
                 # update the inner frame's width to fill the canvas
                 canvas.itemconfigure(interior_id, width=canvas.winfo_width())
-        #calls the function _configure_canvas
-        #canvas.bind('<Configure>', _configure_canvas)
+        # calls the function _configure_canvas
+        # canvas.bind('<Configure>', _configure_canvas)
 
 
 class TraceConsole:
 
-    '''
+    """
     Creates a Frame for Logging Messages
-    '''
+    """
 
     def __init__(self):
 
-        '''
+        """
         Init the main GUI window
-        '''
+        """
 
         self._logFrame = Tkinter.Frame()
         self._log = Tkinter.Text(self._logFrame, wrap=Tkinter.NONE,
@@ -168,9 +167,9 @@ class TraceConsole:
 
     def log(self, msg, level=None):
 
-        '''
+        """
         Write on GUI
-        '''
+        """
 
         self._log.insert('end', msg + '\n')
         self._log.see(Tkinter.END)
@@ -178,10 +177,10 @@ class TraceConsole:
 
 class course_object:
 
-    '''
+    """
     A class for storing course_object consisting of course url, course name,
     checkbox status, directory, nf link, last url from main url, last url from nf
-    '''
+    """
 
     def __init__(self, mainlink, name, chkbox=None, directory=None,
                  nflink=None, lastmain=None, lastnf=None):
@@ -215,9 +214,9 @@ class course_object:
 
 class LoginFrame(Frame):
 
-    '''
+    """
     Frame for login page.
-    '''
+    """
 
     def __init__(self, master):
         Frame.__init__(self)
@@ -271,9 +270,9 @@ class LoginFrame(Frame):
 
     def _login_btn_clicked(self):
 
-        '''
+        """
         On login button click
-        '''
+        """
         t.log('Attempting login...')
         #Check for connection and write to Cred
         if self.check_connection():
@@ -313,9 +312,9 @@ class LoginFrame(Frame):
 
     def login(self, username, password):
 
-        '''
+        """
         Submit form using arguments and set myname to username
-        '''
+        """
 
         br.select_form(nr=0)
         br['username'] = username
@@ -334,9 +333,9 @@ class LoginFrame(Frame):
             t.log('Incorrect username or password')
 
     def check_connection(self):
-        '''
+        """
         Check for connection availability
-        '''
+        """
 
         try:
             br.open('http://moodle.iitb.ac.in/login/index.php')
@@ -348,9 +347,9 @@ class LoginFrame(Frame):
 
     def new_window(self):
 
-        '''
+        """
         Go to Home screen
-        '''
+        """
 
         self.destroy()
         self.newWindow = Home(self.master)
@@ -358,9 +357,9 @@ class LoginFrame(Frame):
 
 class Home(Frame):
 
-    '''
+    """
     Frame for Home Screen.
-    '''
+    """
 
     def __init__(self, master):
         Frame.__init__(self)
@@ -385,10 +384,10 @@ class Home(Frame):
 
     def nfretrieve(self, url, directory, number):
 
-        '''
+        """
         Retrieve from News Forum when passed nfurl i.e forum/view.php
         Passed arguments forum url, directory, course number (as appearing in Preferences)
-        '''
+        """
 
         m.update()
         global t
@@ -471,10 +470,10 @@ class Home(Frame):
 
 
     def retrieve(self, url, directory):
-        '''
+        """
         Retrieve from course main page
         Arguments are main page url, directory
-        '''
+        """
 
         m.update()
         global t
@@ -559,9 +558,9 @@ class Home(Frame):
             self.pack()
 
     def stopDLD(self):
-        '''
+        """
         On click of Stop DLD button
-        '''
+        """
 
         global t, stop_DLD
         t.log('Terminating downloads.')
@@ -569,9 +568,9 @@ class Home(Frame):
 
     def DLD(self):
 
-        '''
+        """
         On click of DLD Files button
-        '''
+        """
 
         global t, stop_DLD
         t.log('Downloading files, Please do not close until complete!')
@@ -622,9 +621,9 @@ class Home(Frame):
 
     def pref(self):
 
-        '''
+        """
         On Click Preferences button
-        '''
+        """
 
         t.log("Populating list of courses. This may take a while. Please be patient..")
         m.update()
@@ -633,9 +632,9 @@ class Home(Frame):
 
     def logout(self):
 
-        '''
+        """
         On Click Logout button
-        '''
+        """
         lines = ["\n","\n","\n","C:/","\n","1","\n"]
         if os.path.exists("Cred"):
             file_cred = open('Cred', 'r')
@@ -657,30 +656,30 @@ class Home(Frame):
 
 class Pref_Screen(Frame):
 
-    '''
+    """
     Frame for Preferences screen.
-    '''
+    """
 
     def sall(self):
-        '''
+        """
         On CLick Select All button
-        '''
+        """
         n = len(online_courses)
         for i in range(0, n):
             courseboxes[i].checkbox.select()
 
     def dall(self):
-        '''
+        """
         On CLick Deselect All button
-        '''
+        """
         n = len(online_courses)
         for i in range(0, n):
             courseboxes[i].checkbox.deselect()
 
     def save(self):
-        '''
+        """
         On CLick Save Settings button
-        '''
+        """
         #Saves courseboxes and online_courses data to Preferences
         open('Preferences', 'w').close()
         preferences = open('Preferences', 'w')
@@ -723,19 +722,19 @@ class Pref_Screen(Frame):
             remove_from_startup()
 
     def load_online_courses(self):
-        '''
+        """
         Finds all links for course main pages and creates course_object objects
-        '''
+        """
         br.open('http://moodle.iitb.ac.in/')
 
         for link in br.links(url_regex='http://moodle.iitb.ac.in/course/view.php'):
             online_courses.append(course_object(link.url, link.text))
 
     def update_from_preferences(self, n):
-        '''
+        """
         Finds courses from Preferences and updates parameters
         for corresponding course in online_courses
-        '''
+        """
 
         if os.path.exists('Preferences'):
             file_pref = open('Preferences', 'r')
@@ -808,23 +807,23 @@ class Pref_Screen(Frame):
 
 
 class box(Frame):
-    '''
+    """
     Class for box object having checkbox, label, browsebutton
-    '''
+    """
 
     def getdir(self):
-        '''
+        """
         On click for browse button of courses
-        '''
+        """
         directory = tkFileDialog.askdirectory(parent=m, initialdir='C:/',
                                               title='Please select a directory')
         if len(directory) > 0:
             self.directory.set(directory)
 
     def rootgetdir(self):
-        '''
+        """
         On click for browse button for Root directory
-        '''
+        """
         directory = tkFileDialog.askdirectory(parent=m, initialdir='C:/',
                                               title='Please select a directory')
         if len(directory) > 0:
