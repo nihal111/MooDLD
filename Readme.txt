@@ -1,36 +1,74 @@
-MooDLD - the Ultimate Moodle Downloader 
-					-Version 1.0
-					-For Windows
+MooDLD - the Ultimate Moodle Downloader
+
+Release 1.0
+
+Designed for IIT Bombay Moodle
+
 This application serves the purpose of automating the process of downloading files from Moodle. 
-It downloads all the ".pdf" files from the listed courses to preset directories on the user's computer.
-Designed for IIT Bombay Moodle. Made using Python. (Libraries: Tkinter, Mechanize)
+It downloads all the files from the listed courses to the user’s computer.
 
-Instructions for use-
+Dependencies
 
-1. Windows- Extract the MooDLD.rar file before use.
-   Linux- Download "MooDLD.py" and "moodle.ico" from Github Repo.
-Install python 2.7 and libraries: Tkinter and Mechanize.
-(Open terminal and type: "sudo apt-get install python2.7" to install Pthon 2.7, "sudo apt-get install python-mechanize" to install mechanize and "sudo apt-get install python-tk" to install Tkinter on Ubuntu and debian like Linuxes. 
-The python website describes a whole bunch of other ways to get Python.
+Tkinter
+Mechanize
+pyCrypto
 
-2. The user has to login using LDAP ID/Password. ("Keep me logged in" can be checked to avoid entering credentials repeatedly.)
+Instructions for use
 
-3. On the first run, after logging in, the user must go to the "Preferences" page to browse directories and check the courses to be downloaded. (Default directory is C:/).
+Linux and Mac - Download MooDLD.py and moodle.ico from Github Repository.
 
-4. Press "Save Settings" to save the settings for further use. These can be changed by visiting the Preferences page any time. 
+Windows - Extract the Setup.rar file and run it. Installation is straightforward. 
+Note: It is recommended to set the installation directory to a location which does not require administrator access to modify files. If you set it to “C:/Program Files(x86)/MooDLD”, MooDLD might give an error like “MooDLD returned -1”. To fix this, either change the installation directory or right click on the icon and “Run MooDLD as administrator”.
 
-5. The user has to click on the "DLD Files" button to download files of selected courses from Moodle.
+Install Dependencies
 
+mechanize 
+On Ubuntu use sudo apt-get install python-mechanize
 
-The application creates two ".txt" files in the directory in which it is kept - "Cred.txt" and "Preferences.txt" 
-These files are essential for the working of the application and must not be deleted! Deletion of above files will lead to loss in saved settings. 
-Also if a course has folders within it, MooDLD creates a new folder in the pre-set directory and downloads all the folder contents into this newly created folder, effectively, replicating the entire structure present on the website on your local system.
-Assignment handling has also been added so that the assignments which are uploaded are also downloaded as Moodle treats assignments differently.
+On Mac use sudo pip install mechanize
 
+Tkinter 
 
-For any suggestions or feedback:
+On Ubuntu use sudo apt-get install python-tk
+On Mac Tkinter is installed by default when you install python
+
+pyCrypto
+
+Install using pip
+
+pip install pycrypto
+
+Run using python MooDLD.py
+
+-------------------
+The user has to login using LDAP ID/Password. 
+(Keep me logged in can be checked to avoid entering credentials repeatedly)
+
+On the first run, after logging in, the user must go to the Preferences page to select the courses to be downloaded. The directory for each course also needs to be specified. The user can also change the root directory to effectively set the directory of all courses to /Course_Name/. On Windows, the auto-download option configures the app to open on every Windows boot and automatically start download of selected courses.
+
+Click “Save Settings” to save the settings for further use. These can be changed by visiting the Preferences page any time.
+
+The user has to click on the DLD Files button to download files of selected courses from Moodle.
+
+The application creates two .txt files in the directory in which it is kept - Cred.txt and Preferences.txt. 
+
+These files are essential for the working of the application and must NOT be deleted! Deletion of above files will lead to loss in saved settings.
+
+If a course has folders within it, MooDLD creates a new folder in the pre-set directory and downloads all the folder contents into this newly created folder, effectively, replicating the entire structure present on the website on your local system. 
+Assignment handling has also been added so that the assignments which are uploaded are also downloaded. 
+News Forum download has also been integrated, MooDLD downloads all downloadable files from News Forum threads as well.
+
+Made By
+
+Nihal Singh - nihal111
+Arpan Banerjee - arpan98
+Akash Trehan - CodeMaxx
+
+Suggestions and Feedback
+Please feel free to contact us:
 nihal.111@gmail.com
+arpanbnrj9@gmail.com
+akash.trehan123@gmail.com
 
-Made By:
-Nihal Singh
-Arpan Banerjee
+Any bugs found should be reported to the issue tracker.
+You can send in Pull Requests to contribute to the project.

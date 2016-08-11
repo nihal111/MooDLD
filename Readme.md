@@ -1,6 +1,6 @@
 # MooDLD - the Ultimate Moodle Downloader
 
-##### Release 2.0
+##### Release 1.0
 
 <p align="center"><b>Designed for IIT Bombay Moodle</b></p>
 
@@ -16,7 +16,8 @@ It downloads all the files from the listed courses to the user's computer.
 ### Instructions for use
 
 1. **Linux and Mac** - Download `MooDLD.py` and `moodle.ico` from Github Repository.<br/>
-**Windows** - Extract the MooDLD.rar file before use.
+**Windows** - Extract the Setup.rar file and run it. Installation is straightforward. 
+Note: It is recommended to set the installation directory to a location which does not require administrator access to modify files. If you set it to "C:/Program Files(x86)/MooDLD", MooDLD might give an error like "MooDLD returned -1". To fix this, either change the installation directory or right click on the icon and "Run MooDLD as administrator".
 
 2. Install Dependencies
   - **mechanize**  <br/>On Ubuntu use `sudo apt-get install python-mechanize`<br/>
@@ -34,11 +35,11 @@ It downloads all the files from the listed courses to the user's computer.
 
 4. The user has to login using LDAP ID/Password. <br/>(**Keep me logged in** can be checked to avoid entering credentials repeatedly)
 
-5. On the first run, after logging in, the user must go to the **Preferences** page to select the courses to be downloaded.
+5. On the first run, after logging in, the user must go to the **Preferences** page to select the courses to be downloaded. The directory for each course also needs to be specified. The user can also change the root directory to effectively set the directory of all courses to <Root Directory>/Course_Name/. On Windows, the auto-download option configures the app to open on every Windows boot and automatically start download of selected courses.
 
 6. Click "Save Settings" to save the settings for further use. These can be changed by visiting the **Preferences** page any time.
 
-7. The user has to click on the **DLD Files** button to download files of selected courses from Moodle. Auto-Download feature is also available.
+7. The user has to click on the **DLD Files** button to download files of selected courses from Moodle.
 
 
 The application creates two `.txt` files in the directory in which it is kept - `Cred.txt` and `Preferences.txt`.
@@ -46,6 +47,7 @@ The application creates two `.txt` files in the directory in which it is kept - 
 
 If a course has folders within it, MooDLD creates a new folder in the pre-set directory and downloads all the folder contents into this newly created folder, effectively, replicating the entire structure present on the website on your local system.
 Assignment handling has also been added so that the assignments which are uploaded are also downloaded.
+News Forum download has also been integrated, MooDLD downloads all downloadable files from News Forum threads as well.
 
 ### Made By
 Nihal Singh - [nihal111](https://github.com/nihal111)<br/>
