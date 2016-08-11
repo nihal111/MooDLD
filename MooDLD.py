@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import os
+import time
 import urllib
 from Tkinter import Frame, Label, Button, Checkbutton, IntVar, StringVar, Entry, Scrollbar, Canvas
 import tkFileDialog
@@ -26,16 +27,6 @@ myname = ''
 # Boolean for force terminate Download
 stop_DLD = False
 # Boolean for whether DLD files is initiated once
-auto_download = False
-
-if os.path.exists('Cred'):
-    file_pref = open('Cred', 'r')
-    lines = file_pref.readlines()
-    if len(lines) > 4:
-        x = lines[4].replace('\n', '')
-        if x == '1':
-            auto_download = True
-    file_pref.close()
 
 """
 Flow Of Control:
@@ -327,8 +318,8 @@ class LoginFrame(Frame):
             br.open(self.profile)
             global myname
             myname = br.title()[:br.title().index(':')]
-            self.new_window()
             t.log('Successful Login as ' + myname)
+            self.new_window()
         else:
             t.log('Incorrect username or password')
 
@@ -378,9 +369,16 @@ class Home(Frame):
         self.stop.config(state='disabled')
 
         #Download automatically on launch
-        if auto_download is True:
-            t.log("Download automatically started. This can be disabled from preferences")
-            self.DLD()
+        if os.path.exists('Cred'):
+            file_pref = open('Cred', 'r')
+            lines = file_pref.readlines()
+            if len(lines) > 4:
+                x = lines[4].replace('\n', '')
+                if x == '1':
+                    auto_download = True
+                    t.log("Download automatically started. This can be disabled from preferences")
+                    self.DLD()
+            file_pref.close()
 
     def nfretrieve(self, url, directory, number):
 
@@ -612,6 +610,7 @@ class Home(Frame):
             #If Preferences does not exist take user to Preferences screen
         else:
             t.log('Please set Preferences first!')
+            t.log('Set Auto-Download on to launch application and start downloads on windows boot.')
             self.sync.config(state='normal')
             self.pref.config(state='normal')
             self.logout.config(state='normal')
@@ -698,10 +697,6 @@ class Pref_Screen(Frame):
 
         preferences.close()
 
-        #Go to Home screen
-        self.frame.destroy()
-        self.newWindow = Home(m)
-
         #Save root directory address to Cred
         creds = open('Cred', 'r')
         lines = creds.readlines()
@@ -710,10 +705,9 @@ class Pref_Screen(Frame):
         creds = open('Cred', 'w')
         lines[3] = self.root_dir_box.directory.get() + '\n'
         lines[4] = str(self.auto.get()) + '\n'
-
         creds.writelines(lines)
         creds.close()
-
+        
         #Add key to registry for startup launch
         if self.auto.get() == 1:
             add_to_startup()
@@ -721,6 +715,10 @@ class Pref_Screen(Frame):
         else:
             remove_from_startup()
 
+        #Go to Home screen
+        self.frame.destroy()
+        self.newWindow = Home(m)
+        
     def load_online_courses(self):
         """
         Finds all links for course main pages and creates course_object objects
@@ -790,7 +788,7 @@ class Pref_Screen(Frame):
         self.save.grid(row=0, column=2, pady=10)
 
         self.auto = IntVar()
-        self.autoDLD = Checkbutton(self.frame.interior, text="Auto-Download", width=20,
+        self.autoDLD = Checkbutton(self.frame.interior, text="Auto-Download (on Startup)", width=20,
                                    variable=self.auto)
         self.autoDLD.grid(row=0, column=0, sticky="w")
 
