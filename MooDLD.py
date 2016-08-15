@@ -444,8 +444,9 @@ class Home(Frame):
                     file_name = urllib.unquote_plus(file_name)
                     if file_name.endswith(file_extension):
                         file_name = file_name[:-len(file_extension)]
-                    if file_extension in ['.pdf', '.doc', '.ppt', '.pptx', '.docx', '.xls', '.xlsx',
-                                          '.cpp', '.h', '.html', '.py', '.css', '.tex', '.java']:
+                    if file_extension in ['.txt', '.pdf', '.ppt', '.pptx', '.doc', '.docx', '.xls', '.xlsx',
+                                          '.cpp', '.h', '.html', '.css', '.js', '.py', '.tex', '.java',
+                                          '.jpg', '.jpeg', '.png', '.zip', '.tar.gz']:
                         if not os.path.exists(directory + file_name + file_extension):
                             if not link.url in downloadlinks:
                                 t.log('Downloading ' + file_name
