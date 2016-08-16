@@ -12,7 +12,13 @@ from Crypto.Cipher import DES
 moodle = 'http://moodle.iitb.ac.in/login/index.php'
 # Create a browser instance
 br = mechanize.Browser()
-
+br.set_handle_robots(False)
+# User-Agent (fake agent to google-chrome linux x86_64)
+br.addheaders = [('User-agent','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.56 Safari/535.11'),
+                 ('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'),
+                 ('Accept-Encoding', 'gzip,deflate,sdch'),
+                 ('Accept-Language', 'en-US,en;q=0.8'),
+                 ('Accept-Charset', 'ISO-8859-1,utf-8;q=0.7,*;q=0.3')]
 # Declaring global arrays
 # For box objects in Pref_Screen. Consists of checkbox, label and button
 courseboxes = []
@@ -197,6 +203,13 @@ class course_object:
 
     #Get nf_link for any course_object
     def get_nf_link(self):
+        br.set_handle_robots(False)
+        br.addheaders = [('User-agent',
+                          'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.56 Safari/535.11'),
+                         ('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'),
+                         ('Accept-Encoding', 'gzip,deflate,sdch'),
+                         ('Accept-Language', 'en-US,en;q=0.8'),
+                         ('Accept-Charset', 'ISO-8859-1,utf-8;q=0.7,*;q=0.3')]
         br.open(self.mainlink)
         for link in br.links(url_regex='http://moodle.iitb.ac.in/mod/forum/view.php'):
             if "?f=" not in link.url and not link.url.endswith('id=340'):
@@ -257,6 +270,13 @@ class LoginFrame(Frame):
                     decrypted_username = des.decrypt(str((cred[1])[:cred[1].index('\n')]).decode('hex'))
                     decrypted_password = des.decrypt(str((cred[2])[:cred[2].index('\n')]).decode('hex'))[:-(int(space_pass))]
                     self.login(decrypted_username, decrypted_password)
+                    br.set_handle_robots(False)
+                    br.addheaders = [('User-agent',
+                                      'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.56 Safari/535.11'),
+                                     ('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'),
+                                     ('Accept-Encoding', 'gzip,deflate,sdch'),
+                                     ('Accept-Language', 'en-US,en;q=0.8'),
+                                     ('Accept-Charset', 'ISO-8859-1,utf-8;q=0.7,*;q=0.3')]
                     br.open(moodle)
 
     def _login_btn_clicked(self):
@@ -315,6 +335,13 @@ class LoginFrame(Frame):
             for link in \
                 br.links(url_regex='http://moodle.iitb.ac.in/user/profile.php'):
                 self.profile = link.url
+            br.set_handle_robots(False)
+            br.addheaders = [('User-agent',
+                              'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.56 Safari/535.11'),
+                             ('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'),
+                             ('Accept-Encoding', 'gzip,deflate,sdch'),
+                             ('Accept-Language', 'en-US,en;q=0.8'),
+                             ('Accept-Charset', 'ISO-8859-1,utf-8;q=0.7,*;q=0.3')]
             br.open(self.profile)
             global myname
             myname = br.title()[:br.title().index(':')]
@@ -329,6 +356,13 @@ class LoginFrame(Frame):
         """
 
         try:
+            br.set_handle_robots(False)
+            br.addheaders = [('User-agent',
+                              'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.56 Safari/535.11'),
+                             ('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'),
+                             ('Accept-Encoding', 'gzip,deflate,sdch'),
+                             ('Accept-Language', 'en-US,en;q=0.8'),
+                             ('Accept-Charset', 'ISO-8859-1,utf-8;q=0.7,*;q=0.3')]
             br.open('http://moodle.iitb.ac.in/login/index.php')
             return 1
         except:
@@ -395,7 +429,13 @@ class Home(Frame):
         self.nflinks = []
         global downloaded
         global downloadlinks
-
+        br.set_handle_robots(False)
+        br.addheaders = [('User-agent',
+                          'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.56 Safari/535.11'),
+                         ('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'),
+                         ('Accept-Encoding', 'gzip,deflate,sdch'),
+                         ('Accept-Language', 'en-US,en;q=0.8'),
+                         ('Accept-Charset', 'ISO-8859-1,utf-8;q=0.7,*;q=0.3')]
         br.open(url)
 
         #Read lines from Preferences. Obtain last visited discussion for course at index=number
@@ -420,7 +460,13 @@ class Home(Frame):
         #iterating through every discussion
         for url in self.urls:
             m.update()
-
+            br.set_handle_robots(False)
+            br.addheaders = [('User-agent',
+                              'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.56 Safari/535.11'),
+                             ('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'),
+                             ('Accept-Encoding', 'gzip,deflate,sdch'),
+                             ('Accept-Language', 'en-US,en;q=0.8'),
+                             ('Accept-Charset', 'ISO-8859-1,utf-8;q=0.7,*;q=0.3')]
             br.open(url)
 
             #create an array of all downloadables
@@ -435,6 +481,13 @@ class Home(Frame):
                     break
                 else:
                     m.update()
+                    br.set_handle_robots(False)
+                    br.addheaders = [('User-agent',
+                                      'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.56 Safari/535.11'),
+                                     ('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'),
+                                     ('Accept-Encoding', 'gzip,deflate,sdch'),
+                                     ('Accept-Language', 'en-US,en;q=0.8'),
+                                     ('Accept-Charset', 'ISO-8859-1,utf-8;q=0.7,*;q=0.3')]
                     br.open(link.url)
                     url_text = br.geturl()
                     if br.geturl().endswith('forcedownload=1'):
@@ -479,6 +532,13 @@ class Home(Frame):
         global downloaded
         global downloadlinks
         self.links = []
+        br.set_handle_robots(False)
+        br.addheaders = [('User-agent',
+                          'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.56 Safari/535.11'),
+                         ('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'),
+                         ('Accept-Encoding', 'gzip,deflate,sdch'),
+                         ('Accept-Language', 'en-US,en;q=0.8'),
+                         ('Accept-Charset', 'ISO-8859-1,utf-8;q=0.7,*;q=0.3')]
         br.open(url)
 
         #Find all links inside given url and form array (self.links)
@@ -502,6 +562,13 @@ class Home(Frame):
                 break
             else:
                 m.update()
+                br.set_handle_robots(False)
+                br.addheaders = [('User-agent',
+                                  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.56 Safari/535.11'),
+                                 ('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'),
+                                 ('Accept-Encoding', 'gzip,deflate,sdch'),
+                                 ('Accept-Language', 'en-US,en;q=0.8'),
+                                 ('Accept-Charset', 'ISO-8859-1,utf-8;q=0.7,*;q=0.3')]
                 br.open(link.url)
                 url_text = br.geturl()
                 if br.geturl().endswith('forcedownload=1'):
@@ -724,6 +791,13 @@ class Pref_Screen(Frame):
         """
         Finds all links for course main pages and creates course_object objects
         """
+        br.set_handle_robots(False)
+        br.addheaders = [('User-agent',
+                          'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.56 Safari/535.11'),
+                         ('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'),
+                         ('Accept-Encoding', 'gzip,deflate,sdch'),
+                         ('Accept-Language', 'en-US,en;q=0.8'),
+                         ('Accept-Charset', 'ISO-8859-1,utf-8;q=0.7,*;q=0.3')]
         br.open('http://moodle.iitb.ac.in/')
 
         for link in br.links(url_regex='http://moodle.iitb.ac.in/course/view.php'):
