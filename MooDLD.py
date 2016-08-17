@@ -9,7 +9,7 @@ import Tkinter
 import mechanize
 from Crypto.Cipher import DES
 
-moodle = 'http://moodle.iitb.ac.in/login/index.php'
+moodle = 'http://moodle.iitb.ac.in/'
 # Create a browser instance
 br = mechanize.Browser()
 br.set_handle_robots(False)
@@ -326,7 +326,7 @@ class LoginFrame(Frame):
         """
         Submit form using arguments and set myname to username
         """
-
+        br.open(moodle)
         br.select_form(nr=0)
         br['username'] = username
         br['password'] = password
