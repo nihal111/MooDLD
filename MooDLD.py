@@ -326,7 +326,16 @@ class LoginFrame(Frame):
         """
         Submit form using arguments and set myname to username
         """
+        br = mechanize.Browser()
+        br.set_handle_robots(False)
+        br.addheaders = [('User-agent',
+                          'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.56 Safari/535.11'),
+                         ('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'),
+                         ('Accept-Encoding', 'gzip,deflate,sdch'),
+                         ('Accept-Language', 'en-US,en;q=0.8'),
+                         ('Accept-Charset', 'ISO-8859-1,utf-8;q=0.7,*;q=0.3')]
         br.open(moodle)
+        print br.geturl()
         br.select_form(nr=0)
         br['username'] = username
         br['password'] = password
