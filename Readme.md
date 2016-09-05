@@ -31,9 +31,9 @@ Note: It is recommended to set the installation directory to a location which do
   Install using pip<br/>
   `pip install pycrypto`
 
-3. Run using one of the following:
-    a. `python2 MooDLD.py`(Won't work with python3)
-    b. `./MooDLD.py`
+3. Run using one of the following:<br/>
+    a. `python2 MooDLD.py`(Won't work with python3)<br/>
+    b. `./MooDLD.py`<br/>
 
     In case you get a `Permission Denied` error for method `b`. Run `chmod +x MooDLD.py` and then try again.
 
