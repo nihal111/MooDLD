@@ -16,7 +16,7 @@ It downloads all the files from the listed courses to the user's computer.
 ### Instructions for use
 
 1. **Linux and Mac** - Download `MooDLD.py` and `moodle.ico` from Github Repository.<br/>
-**Windows** - Extract the Setup.rar file from [here](https://github.com/nihal111/MooDLD/raw/master/Setup.rar) and run it. Installation is straightforward. 
+**Windows** - Extract the Setup.rar file from [here](https://github.com/nihal111/MooDLD/raw/master/Setup.rar) and run it. Installation is straightforward.
 Note: It is recommended to set the installation directory to a location which does not require administrator access to modify files. If you set it to "C:/Program Files(x86)/MooDLD", MooDLD might give an error like "MooDLD returned -1". To fix this, either change the installation directory or right click on the icon and "Run MooDLD as administrator".
 
 2. Install Dependencies
@@ -31,7 +31,11 @@ Note: It is recommended to set the installation directory to a location which do
   Install using pip<br/>
   `pip install pycrypto`
 
-3. Run using `python MooDLD.py`
+3. Run using one of the following:
+    a. `python2 MooDLD.py`(Won't work with python3)
+    b. `./MooDLD.py`
+
+    In case you get a `Permission Denied` error for method `b`. Run `chmod +x MooDLD.py` and then try again.
 
 4. The user has to login using LDAP ID/Password. <br/>(**Keep me logged in** can be checked to avoid entering credentials repeatedly)
 
